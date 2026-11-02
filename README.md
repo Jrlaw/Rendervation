@@ -40,7 +40,8 @@ running.
 
 - **Home:** every house and room, each with its latest render.
 - **Walkthrough:** walk around the room in 3D. Switch day and evening, flip between designs,
-  look at the before photos, and fix a measurement (Claude re-exports the room for you).
+  look at the before photos, and fix a measurement (Claude re-exports the room for you). The
+  Settings button adjusts resolution, antialiasing, brightness and field of view for your machine.
 - **Plans:** a top-down view with every dimension and where it came from.
 - **Selections:** every product and idea for the room, chosen or not, with links and prices.
 

@@ -63,8 +63,35 @@ main { flex: 1; min-height: 0; display: flex; }
   position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: flex-start; pointer-events: none;
 }
 .hint span { background: var(--surface); color: var(--muted); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; font-size: 0.8rem; }
-.stage-dn { position: absolute; top: 12px; right: 12px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
-.stage-var { position: absolute; top: 56px; right: 12px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
+.stage-controls {
+  position: absolute; top: 12px; right: 12px; left: 12px; max-height: calc(100% - 24px); display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  pointer-events: none;
+}
+.stage-controls > * { pointer-events: auto; }
+.stage-dn { order: 1; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
+.stage-var { order: 2; flex-wrap: wrap; justify-content: flex-end; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
+.stage-controls .stage-var { border-radius: 18px; }   /* a wrapped pill would bulge */
+/* graphics settings: a button, its panel and the frame-rate readout */
+.stage-settings {
+  order: 4; font: 500 0.8125rem var(--font-body); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15);
+}
+.stage-settings[aria-expanded="true"] { background: var(--oak); color: var(--oak-ink); border-color: var(--oak); }
+.settings-panel {
+  order: 5; z-index: 5; flex: 0 1 auto; min-height: 0; width: min(280px, 100%); overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 4px 16px rgb(0 0 0 / 0.2); font-size: 0.875rem;
+}
+.settings-panel[hidden] { display: none; }
+.settings-panel label { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.settings-panel label[hidden], .settings-note[hidden] { display: none; }
+.settings-panel select { font: inherit; color: inherit; background: var(--chip); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; }
+.settings-panel input[type="range"] { width: 130px; accent-color: var(--oak); }
+.settings-panel input[type="checkbox"] { accent-color: var(--oak); }
+.settings-note { margin: 0; color: var(--muted); font-size: 0.8rem; }
+.settings-panel button { font: 500 0.82rem var(--font-body); color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+.stage-fps { order: 6; pointer-events: none; padding: 2px 8px; border-radius: 6px; background: var(--surface); color: var(--muted); font: 500 0.75rem var(--font-mono, monospace); pointer-events: none; }
+.stage-fps[hidden] { display: none; }
 #loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 0.9rem; }
 
 aside {
@@ -145,7 +172,7 @@ figure > img { width: 100%; max-width: 100%; aspect-ratio: 4 / 3; object-fit: co
 main > section[hidden] { display: none !important; }      /* #walk's display: flex would otherwise win */
 .lightbox figure > img { width: auto; height: auto; aspect-ratio: auto; background: none; }
 /* dimensions: toggle, labels on the 3D lines, and the correction form */
-.stage-dims { position: absolute; top: 100px; right: 12px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
+.stage-dims { order: 3; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
 .dimlabels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .dimlabel { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; white-space: nowrap;
   font: 600 0.78rem var(--font-body); color: #fff; background: rgb(24 21 18 / 0.85); border: 0;
