@@ -62,7 +62,9 @@ numbered, and record the answers under "Notes from the walkthrough".
    lines up with the photo. Put the converted photos in `web/before/photoN.jpg`.
 4. **Check against the photos.** Render each photo view (`--samples 24 --res 1000`) and compare
    it with the photo side by side. Anything that doesn't line up is a wrong number. Fix it, or
-   ask for one specific measurement ("corner to the window trim, please").
+   ask for one specific measurement ("corner to the window trim, please"). A wide side-by-side
+   hides misplaced fixtures, so also crop in on each fixture (faucet, towel bar, light, mirror) in
+   **every** photo that shows it, and take its position and finish from those crops.
 5. Show the person the side-by-side comparisons. Stop here if that's all they wanted.
 6. **Save the as-is renders. Every room, every time, before any design work.** They're the "before"
    of the project, and the photos can't stand in for them: photos have clutter, odd angles and
