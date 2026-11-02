@@ -149,7 +149,7 @@ def egg(length, half_w, back_square=True, n_front=2.3, n_back=5.0, N=48):
 # ---------------------------------------------------------------- rugs
 def rug(name, x0, x1, y0, y1, fname, flip=False):
     """Flat bath mat with a picture (textures/fname) across the top."""
-    rug_material(name, fname, flip)
+    rug_material(name, fname, (x0, x1, y0, y1), flip)
     box(name, x0, x1, y0, y1, 0, 0.45, name, bevel=0.35)
 
 

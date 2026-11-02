@@ -411,19 +411,26 @@ def leaf_material():
     core.MATS["leaves"] = m
 
 
-def rug_material(name, fname, flip=False):
-    """Bath mat with its picture mapped across the top (Generated 0..1 coords);
-    flip turns the picture to read from the other side."""
+def rug_material(name, fname, bounds, flip=False):
+    """Bath mat with its picture mapped across the top. bounds = (x0, x1, y0, y1) in inches, in
+    world space, not Generated coords: those follow the object's bounding box, and the bake joins
+    every object into one, which would stretch the picture across the room. flip turns the
+    picture to read from the other side."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
     bsdf = nt.nodes["Principled BSDF"]
-    tc = nt.nodes.new("ShaderNodeTexCoord")
+    geo = nt.nodes.new("ShaderNodeNewGeometry")
     mp = nt.nodes.new("ShaderNodeMapping")
+    x0, x1, y0, y1 = (v * IN for v in bounds)
+    sx, sy = 1 / (x1 - x0), 1 / (y1 - y0)
     if flip:
-        mp.inputs["Location"].default_value = (1, 1, 0)
-        mp.inputs["Scale"].default_value = (-1, -1, 1)
-    nt.links.new(tc.outputs["Generated"], mp.inputs[0])
+        mp.inputs["Location"].default_value = (1 + x0 * sx, 1 + y0 * sy, 0)
+        mp.inputs["Scale"].default_value = (-sx, -sy, 1)
+    else:
+        mp.inputs["Location"].default_value = (-x0 * sx, -y0 * sy, 0)
+        mp.inputs["Scale"].default_value = (sx, sy, 1)
+    nt.links.new(geo.outputs["Position"], mp.inputs[0])
     t = tex_node(nt, fname)
     t.extension = "EXTEND"
     nt.links.new(mp.outputs[0], t.inputs[0])
