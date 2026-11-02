@@ -31,6 +31,12 @@ The room lives in a folder like `houses/<house>/rooms/<room>/` (or `examples/...
    look wrong (a gap at a corner, a light with no fixture, tile with no edge, a fixture
    floating in the picture). Note any render older than `room.py` (`ls -l --time-style=+%F_%T`):
    it may not show the current design.
+5. **The as-is model against the photos**, if the room has `renders/asis/`: read those renders
+   and the photos in `intake/`, and crop in on each fixture in every photo that shows it
+   (`magick photo.jpg -crop WxH+X+Y +repage crop.jpg`). Report anything in the wrong spot, or the
+   wrong size, finish or swing (a faucet mid-rim that's really at the end, brass that's nickel).
+   Also check that the as-is design is in `variants` in `web/index.html`, and open its baked
+   model's `scene.json`: a metal or glass material listed in `baked` comes out black.
 
 ## What to check
 

@@ -49,6 +49,10 @@ the selections page and the local server (`lib/serve.sh`, http://127.0.0.1:8000)
 - **Tag every dimension** in `layout.py` MEASURED / FROM PLAN / FROM PHOTO / ASSUMED. With no
   floor plan, estimate from photos against known sizes, and ask for one or two specific
   measurements to settle conflicts.
+- **Always keep as-is renders.** Every room gets them before any design work: `./render.sh --design asis`
+  into `renders/asis/day` and `renders/asis/night`, plus the plan and overview sheets, and baked into the walkthrough as an "As it is" pill in the design picker
+  (PROCESS.md step 2).
+  When a view joins the standard set, render it as-is too. A room without them gets them next.
 - **Check the model against the photos** before designing: render each photo view and compare
   them side by side.
 - **Keep the person's things out of `lib/`.** Specific products (a particular vanity, a tile

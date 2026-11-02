@@ -12,7 +12,8 @@ What the project is (keeping the room as is, a refresh, or a full remodel) and w
 - `layout.py`: every dimension (inches), each tagged MEASURED / FROM PLAN / FROM PHOTO / ASSUMED.
 - `room.py`: builds the room in Blender from `layout.py` and `lib/roomkit`.
 - `textures/`: product textures cut from photos.
-- `renders/latest/day`, `renders/latest/night`: the standard views of the current design;
+- `renders/asis/day`, `renders/asis/night`: the room as it is today (always kept, PROCESS.md step 2);
+  `renders/latest/day`, `renders/latest/night`: the standard views of the current design;
   `renders/options/`: option sets that were compared.
 - `web/`: the walkthrough (`index.html`) and its exported model; `web/before/` holds the photos
   the renders are compared with.
@@ -26,6 +27,11 @@ Quick preview (about 30 seconds on the GPU):
 Standard views, day and evening (`--night`):
 
     ./render.sh --cams photo1,plan --samples 64 --res 1600 --out renders/latest/day
+
+As-is views, the "before" (PROCESS.md step 2; same cameras as the standard views):
+
+    ./render.sh --design asis --cams photo1 --samples 64 --res 1600 --out renders/asis/day
+    ./render.sh --design asis --night --cams photo1 --samples 64 --res 1600 --out renders/asis/night
 
 Selections page (after editing `selections.md`; run from the repo root):
 
