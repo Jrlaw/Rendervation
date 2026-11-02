@@ -64,6 +64,13 @@ numbered, and record the answers under "Notes from the walkthrough".
    it with the photo side by side. Anything that doesn't line up is a wrong number. Fix it, or
    ask for one specific measurement ("corner to the window trim, please").
 5. Show the person the side-by-side comparisons. Stop here if that's all they wanted.
+6. **Save the as-is renders. Every room, every time, before any design work.** They're the "before"
+   of the project, and the photos can't stand in for them: photos have clutter, odd angles and
+   their own lighting. The as-is scene stays buildable for the life of the room with
+   `./render.sh --design asis`. Usually that's a `DESIGN` switch in `room.py`; if most of the room
+   changes, keep it in its own `asis.py` that `room.py` hands off to. Render the standard views,
+   day and evening, to `renders/asis/day/` and `renders/asis/night/`, with `renders/asis/plan.jpg`
+   and the overview sheets (`lib/tools/overview.sh`). Re-render them if the as-is model changes.
 
 ## 3. Ideas and selections
 
@@ -130,6 +137,10 @@ isn't offered twice for the same design.
   design, refreshed whenever a choice changes. Render on the GPU (automatic) and give ETAs
   (for reference, about 35 s per 1600 px / 64-sample view on a mid-range GPU; time the first
   one on a new machine).
+- `renders/asis/`: the same views of the room as it is today (step 2). When a view is added to the
+  standard set, render it from the as-is model too, so every "after" has a "before" from the same
+  spot. If a camera lands inside a wall that hasn't moved yet, nudge the as-is camera and say so
+  in a comment.
 - `./render.sh --export web` re-exports the walkthrough model (seconds, live lighting);
   add `--bake` (~8 min, GPU) to bake the Cycles lighting into it so it looks like the renders.
   Other designs go to `web/variants/<id>/` (same command plus the design's flags) and appear in
@@ -146,8 +157,9 @@ isn't offered twice for the same design.
 ## 5. Save and stop
 
 1. Update the room's README "Current state": what's modeled, open questions, reviews done, and
-   the one next step. If the design changed this session and no trade has reviewed it, offer
-   one now (see "Experts" above).
+   the one next step. If `renders/asis/` is missing or older than the as-is model, render it
+   first. If the design changed this session and no trade has reviewed it, offer one now (see
+   "Experts" above).
 2. Commit, then push, but only when asked (approval is per request). Room work is committed
    in the `houses/` repo; changes to `lib/`, `template/` or these docs go in this repo.
 3. If there's a project tracker, update it with where things stopped and the next step.

@@ -4,7 +4,8 @@ Built from layout.py (inches) with the shared parts in lib/roomkit. Run through 
 options are listed in README.md. Plan coordinates: x east, y north, origin at the room's
 interior NW corner. Start from a plain box that matches the photos, then add what's in the
 room (lib/roomkit/parts.py has doors, outlets, cans, shelves and generic fixtures; specific
-products go in houses/catalog/).
+products go in houses/catalog/). When the new design starts, keep this scene buildable behind
+--design asis: the as-is renders are always kept (PROCESS.md step 2).
 """
 import math
 import os
