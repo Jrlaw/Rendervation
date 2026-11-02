@@ -70,7 +70,10 @@ numbered, and record the answers under "Notes from the walkthrough".
    `./render.sh --design asis`. Usually that's a `DESIGN` switch in `room.py`; if most of the room
    changes, keep it in its own `asis.py` that `room.py` hands off to. Render the standard views,
    day and evening, to `renders/asis/day/` and `renders/asis/night/`, with `renders/asis/plan.jpg`
-   and the overview sheets (`lib/tools/overview.sh`). Re-render them if the as-is model changes.
+   and the overview sheets (`lib/tools/overview.sh`). Bake it into the walkthrough too, so it's a
+   pill in the design picker: `./render.sh --design asis --export web/variants/asis --bake`, listed
+   as `["asis", "As it is"]` in `variants` in `web/index.html`. Redo all of it if the as-is model
+   changes.
 
 ## 3. Ideas and selections
 
