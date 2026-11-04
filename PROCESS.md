@@ -77,6 +77,24 @@ numbered, and record the answers under "Notes from the walkthrough".
    as `["asis", "As it is"]` in `variants` in `web/index.html`. Redo all of it if the as-is model
    changes.
 
+### Fidelity standard
+
+The goal is a render you could mistake for the photo from the same spot, in every room. A rough
+blockout is fine as a first pass, but a room isn't finished while any of these stand in for the real thing:
+
+- **Trim and millwork:** real profiles swept along their path (casing, crown, base, cap, door panels),
+  not stacked boxes. Take the profile from a crop.
+- **Materials:** wood, floors and other figured surfaces use textures cut from the room's own photos
+  (squared up and color-matched), not generated stripes. Check color and gloss under the photo's lighting.
+- **Objects:** furniture, fixtures and hardware get their real shape and details. A plain box or cylinder
+  is a placeholder; list every one left in the README's "Current state" so none is mistaken for done.
+- **Lens and position:** use the photo's EXIF focal length for its camera, and compare under the same
+  lighting as the photo (an evening photo against the `--night` render). Solve the camera from landmarks
+  with `lib/tools/solve_cameras.py`; a mark error above about 20 px at 1600 px wide means a dimension is off.
+
+Tools: `lib/roomkit/millwork.py` (profiles, `sweep`, `plan_sweep`, `lathe`) and `lib/tools/photo_texture.py`
+(square up a piece of a photo).
+
 ## 3. Ideas and selections
 
 Whenever a product link, screenshot or idea comes in, or Claude suggests one:
