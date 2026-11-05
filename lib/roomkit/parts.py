@@ -102,16 +102,18 @@ def register(name, x0, x1, y0, y1):
     return box(name, x0, x1, y0, y1, 0, 0.12, "register")
 
 
-def can_light(name, x, y, power=60.0):
+def can_light(name, x, y, power=60.0, trim=3.4, lens=2.6, spread=115, tilt=0.0):
     """Recessed can in the ceiling: trim ring, glowing lens and a warm spot light.
-    Evening dims it to about a third, --hero further. Listed in scene.json for the walkthrough."""
+    Evening dims it to about a third, --hero further. Listed in scene.json for the walkthrough.
+    trim, lens: radii, inches. spread: beam, degrees. tilt: radians about y, to lie on a sloped
+    ceiling; the light still aims straight down, like a gimbal trim."""
     C = core.CEILING
-    cylinder(f"{name}_trim", 3.4, 0.2, "can_trim", (x, y, C - 0.1), segs=48)
-    cylinder(f"{name}_lens", 2.6, 0.1, "can_lens", (x, y, C - 0.25), segs=48)
+    cylinder(f"{name}_trim", trim, 0.2, "can_trim", (x, y, C - 0.1), rot=(0, tilt, 0), segs=48)
+    cylinder(f"{name}_lens", lens, 0.1, "can_lens", (x, y, C - 0.25), rot=(0, tilt, 0), segs=48)
     ld = bpy.data.lights.new(name, "SPOT")
     ld.energy = power * core.CAN_DIM
     ld.color = (1.0, 0.9, 0.8)
-    ld.spot_size = math.radians(115)
+    ld.spot_size = math.radians(spread)
     ld.spot_blend = 0.6
     ld.shadow_soft_size = 2.5 * IN
     ob = bpy.data.objects.new(name, ld)
