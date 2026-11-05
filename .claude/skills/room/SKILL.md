@@ -44,7 +44,7 @@ the selections page and the local server (`lib/serve.sh`, http://127.0.0.1:8000)
 ## Rules that matter most
 
 - **Log every product, link, suggestion and choice in the room's `selections.md` as it happens.**
-  Do this before modeling it. Passed-on options stay under "Considered" with the reason. Save
+  Do this before modeling it. It lists what's current; passed-on options go in `selections-history.md` with the reason. Save
   product photos to `intake/products/`.
 - **Tag every dimension** in `layout.py` MEASURED / FROM PLAN / FROM PHOTO / ASSUMED. With no
   floor plan, estimate from photos against known sizes, and ask for one or two specific

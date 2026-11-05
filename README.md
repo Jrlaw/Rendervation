@@ -43,7 +43,7 @@ running.
   look at the before photos, and fix a measurement (Claude re-exports the room for you). The
   Settings button adjusts resolution, antialiasing, brightness and field of view for your machine.
 - **Plans:** a top-down view with every dimension and where it came from.
-- **Selections:** every product and idea for the room, chosen or not, with links and prices.
+- **Selections:** what's current for the room, per design option, with links and prices. The full log stays in `selections-history.md`.
 
 The server only listens on this machine. You can also open a room's `web/index.html`
 straight from the folder, but correcting dimensions needs the server.

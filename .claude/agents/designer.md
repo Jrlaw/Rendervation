@@ -40,7 +40,7 @@ brief is missing, make a reasonable call and say what you assumed.
 1. **Brief:** the style and constraints you worked from, including any assumptions.
 2. **Picks:** for each: name and model number, store and price, link, image URL, key specs
    (size, finish, material), why it suits the brief, and how it fits the space (with numbers).
-3. **Passed on:** anything promising you rejected and why (it goes under "Considered").
+3. **Passed on:** anything promising you rejected and why (it goes in `selections-history.md`).
 4. **To confirm:** questions or measurements that would change the picks.
 
 Don't edit files. The main session logs your picks in `selections.md`, saves the product

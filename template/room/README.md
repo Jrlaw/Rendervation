@@ -8,7 +8,7 @@ What the project is (keeping the room as is, a refresh, or a full remodel) and w
 
 - `intake/`: photos, floor plan, measurements and notes about the room as it is today
   (`intake/README.md`).
-- `selections.md`: every product and idea, chosen or not, with links.
+- `selections.md`: what's current, per design option. `selections-history.md`: the log, with options passed on.
 - `layout.py`: every dimension (inches), each tagged MEASURED / FROM PLAN / FROM PHOTO / ASSUMED.
 - `room.py`: builds the room in Blender from `layout.py` and `lib/roomkit`.
 - `textures/`: product textures cut from photos.

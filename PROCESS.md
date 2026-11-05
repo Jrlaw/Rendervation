@@ -73,8 +73,8 @@ numbered, and record the answers under "Notes from the walkthrough".
    changes, keep it in its own `asis.py` that `room.py` hands off to. Render the standard views,
    day and evening, to `renders/asis/day/` and `renders/asis/night/`, with `renders/asis/plan.jpg`
    and the overview sheets (`lib/tools/overview.sh`). Bake it into the walkthrough too, so it's a
-   pill in the design picker: `./render.sh --design asis --export web/variants/asis --bake`, listed
-   as `["asis", "As it is"]` in `variants` in `web/index.html`. Redo all of it if the as-is model
+   pill in the design picker: `./render.sh --design asis --export web --bake`, listed first
+   as `["asis", "As it is"]` in `variants` in `web/index.html`, so it's the leftmost pill and opens by default. Redo all of it if the as-is model
    changes.
 
 ## 3. Ideas and selections
@@ -97,8 +97,9 @@ Whenever a product link, screenshot or idea comes in, or Claude suggests one:
 After any change to `selections.md`, rebuild its web page:
 `python3 lib/tools/selections_page.py houses/<house>/rooms/<room>` (writes `web/selections.html`).
 
-Never drop an option silently. Passed-on options stay in `selections.md` under "Considered"
-so the history is there.
+Never drop an option silently, but keep `selections.md` to what's current: passed-on options and
+the running log go in `selections-history.md` beside it. With several design options, give each its own
+view: a `<!-- options: id=Label | id=Label -->` line and `<!-- only: id id -->` on section headings.
 
 ### Experts: trades reviews, the designer and the checker
 
@@ -146,7 +147,7 @@ isn't offered twice for the same design.
   standard set, render it from the as-is model too, so every "after" has a "before" from the same
   spot. If a camera lands inside a wall that hasn't moved yet, nudge the as-is camera and say so
   in a comment.
-- `./render.sh --export web` re-exports the walkthrough model (seconds, live lighting);
+- `./render.sh --design asis --export web` re-exports the walkthrough's as-is model (seconds, live lighting);
   add `--bake` (~8 min, GPU) to bake the Cycles lighting into it so it looks like the renders.
   Other designs go to `web/variants/<id>/` (same command plus the design's flags) and appear in
   the walkthrough's design picker once listed in `variants` in `web/index.html`. Then update the Selections
