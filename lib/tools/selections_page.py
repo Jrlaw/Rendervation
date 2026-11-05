@@ -55,7 +55,7 @@ page = f"""<!doctype html>
     <a href="selections.html" aria-current="page">Selections</a>
   </div>
 </header>
-<main><article id="doc"></article></main>
+<main><div id="options" class="tabs" role="group" aria-label="Design option" style="margin:1rem auto;width:fit-content"></div><article id="doc"></article></main>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
 <script src="{up}lib/web/lightbox.js"></script>
 <script>
@@ -74,13 +74,33 @@ marked.use({{
     }},
   }},
 }});
-document.getElementById("doc").innerHTML = marked.parse(MD);
-// pictures open larger in a popup
-Lightbox.attach("#doc img");
-// status words read as tags
-document.querySelectorAll("#doc p strong, #doc li strong").forEach((s) => {{
-  if (s.textContent === "Status:") s.parentElement.classList.add("status");
+// options: a "<!-- options: id=Label | id=Label -->" line adds a switcher; a heading's "<!-- only: id id -->" limits its section
+const optLine = MD.match(/<!-- options: (.*?) -->/);
+const OPTIONS = optLine ? optLine[1].split("|").map((o) => o.trim().split("=")) : [];
+function show(option) {{
+  const parts = MD.replace(/<!-- options: .*? -->\\n?/, "").split(/^(?=## )/m).filter((part) => {{
+    const only = part.match(/^## .*<!-- only: (.*?) -->/);
+    return !only || !option || only[1].split(" ").includes(option);
+  }});
+  document.getElementById("doc").innerHTML = marked.parse(parts.join("").replace(/ *<!-- only: .*? -->/g, ""));
+  // pictures open larger in a popup
+  Lightbox.attach("#doc img");
+  // status words read as tags
+  document.querySelectorAll("#doc p strong, #doc li strong").forEach((s) => {{
+    if (s.textContent === "Status:") s.parentElement.classList.add("status");
+  }});
+  document.querySelectorAll("#options button").forEach((b) => b.setAttribute("aria-selected", b.dataset.id === option));
+}}
+const pick = document.getElementById("options");
+OPTIONS.forEach(([id, label]) => {{
+  const b = document.createElement("button");
+  b.dataset.id = id;
+  b.textContent = label;
+  b.onclick = () => show(id);
+  pick.append(b);
 }});
+// opens on the option marked "(chosen)", else the first
+show(OPTIONS.length ? (OPTIONS.find(([, label]) => label.includes("(chosen)")) || OPTIONS[0])[0] : null);
 </script>
 </body>
 </html>
