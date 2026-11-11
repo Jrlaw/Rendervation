@@ -76,6 +76,10 @@ Pages are the repo's own files, served as they are: `index.html`, `houses/`, `ex
 and `template/`. Nothing else is served: not `data/`, not the code, not dot-folders like `.git` or a
 room's `web/.bake`. Every file is sent in full (no "not modified"): a renders link re-pointed at an
 older folder serves an older file at the same address, and browsers would keep the old picture.
+Each HTML page gets the same nav bar across its top as it's sent: the logo and name (to the home
+page) and a GitHub link (`server/app.py`, `with_nav`; styled by `lib/web/nav.css`, logo
+`lib/web/logo.svg`). Pages don't carry it themselves, so a new page has it without doing anything;
+opened straight from the folder, a page has no bar.
 
 The home page is the toolkit's `index.html`, drawn by `lib/web/home.js` from `GET /api/houses`
 (`houses/index.html` in the houses repo only sends old links there). The walkthrough and Plans ask

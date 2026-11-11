@@ -1,4 +1,4 @@
-# Rendervation
+# <img src="lib/web/logo.svg" width="36" height="36" alt="" align="top"> Rendervation
 
 **Render your renovation before you start it.**
 
