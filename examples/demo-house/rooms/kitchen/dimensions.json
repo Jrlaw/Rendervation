@@ -1,0 +1,53 @@
+{
+ "units": "inches",
+ "dimensions": {
+  "ceiling": {
+   "value": 96,
+   "src": "photo",
+   "note": "floor to ceiling",
+   "default": 96,
+   "override": false,
+   "updated": null
+  },
+  "micro_z": {
+   "value": 54,
+   "src": "photo",
+   "note": "floor to the over-the-range microwave's bottom",
+   "default": 54,
+   "override": false,
+   "updated": null
+  },
+  "room_d": {
+   "value": 191,
+   "src": "photo",
+   "note": "interior, north-south: hall wall to the eat-in end's wall (camera solve)",
+   "default": 191,
+   "override": false,
+   "updated": null
+  },
+  "room_w": {
+   "value": 116,
+   "src": "photo",
+   "note": "interior, east-west: two 25\" counters and a 5' aisle (camera solve)",
+   "default": 116,
+   "override": false,
+   "updated": null
+  },
+  "sink_center": {
+   "value": 55,
+   "src": "photo",
+   "note": "north wall to the sink's center",
+   "default": 55,
+   "override": false,
+   "updated": null
+  },
+  "west_base": {
+   "value": 63,
+   "src": "photo",
+   "note": "base cabinets between the fridge and the range (camera solve)",
+   "default": 63,
+   "override": false,
+   "updated": null
+  }
+ }
+}

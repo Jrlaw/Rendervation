@@ -10,12 +10,12 @@ bookkeeping. Send it photos, measurements, product links and ideas, and it build
 Blender, renders options side by side, and records every choice. You don't need to run any of
 the scripts yourself.
 
-[![How it goes: one photo of a dated bathroom, a few plain requests, real products, renders and the walkthrough](docs/demo.gif)](docs/demo.mp4)
+[![How it goes: two photos of a dated kitchen, a few plain requests, real products, renders and the walkthrough](docs/demo.gif)](docs/demo.mp4)
 
 *How a room goes ([full video](docs/demo.mp4)). The terminal part is illustrated, cut down to
-the requests that matter: one public-domain photo, then plain asks for real products, a
-lighting review and a check. The renders and the website after it are the real output, the
-example room in `examples/demo-house/rooms/hall-bath/`: start the server (below), open
+the requests that matter: two public-domain National Park Service photos, then plain asks for
+real products and a check. The renders and the website after it are the real output, the
+example room in `examples/demo-house/rooms/kitchen/`: start the server (below), open
 http://127.0.0.1:8000 and choose **Example**.*
 
 ## Getting started

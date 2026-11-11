@@ -153,6 +153,12 @@ what the person wants. **Offer one** (a one-line question, never run unasked) at
 5. Before the final renders and the bake (they take minutes): the checker. Also right after the
    as-is model, together with offer 1.
 
+**When Claude makes the design calls itself** (an example room, or the person said "your call" or
+"any room"), there's nobody to offer to: run the review at each of those points instead of
+skipping it, and adopt or pass on its fixes the same way, logged in `selections.md`. A design
+nobody but its author has looked at misses things a trade sees at once, such as a bare wall left
+above an over-the-range microwave.
+
 Note each review in the room README's "Current state" (trade, date, adopted or not), so it
 isn't offered twice for the same design.
 

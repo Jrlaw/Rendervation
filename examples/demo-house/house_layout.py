@@ -45,6 +45,8 @@ ROOMS = [
          outline=rect(-60, -100.5, 160, -142.5)),
     dict(id="bedroom", name="Bedroom", floor="1st", listed="",
          outline=rect(70.5, 0, 214.5, -96)),
+    dict(id="kitchen", name="Kitchen", floor="1st", listed="9'8\" x 15'11\"",
+         outline=rect(0, -147, 116, -338), folder="kitchen"),
 ]
 
 # Listing plans, drawn under the map to check the outlines, for example:

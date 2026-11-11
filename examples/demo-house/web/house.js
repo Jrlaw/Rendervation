@@ -125,6 +125,56 @@ window.HOUSE = {
    "status": "placeholder",
    "links": [],
    "seen_in": null
+  },
+  {
+   "id": "kitchen",
+   "name": "Kitchen",
+   "floor": "1st",
+   "kind": "room",
+   "listed": "9'8\" x 15'11\"",
+   "area": 154,
+   "outline": [
+    [
+     0.0,
+     -147.0
+    ],
+    [
+     116.0,
+     -147.0
+    ],
+    [
+     116.0,
+     -338.0
+    ],
+    [
+     0.0,
+     -338.0
+    ]
+   ],
+   "source": "FROM PLAN",
+   "note": null,
+   "to": null,
+   "folder": "kitchen",
+   "status": "example, designed and rendered",
+   "links": [
+    [
+     "Walk through",
+     "../rooms/kitchen/web/index.html"
+    ],
+    [
+     "Renders",
+     "../rooms/kitchen/web/index.html#gallery"
+    ],
+    [
+     "Plans",
+     "../rooms/kitchen/web/plans.html"
+    ],
+    [
+     "Selections",
+     "../rooms/kitchen/web/selections.html"
+    ]
+   ],
+   "seen_in": null
   }
  ],
  "plans": {},

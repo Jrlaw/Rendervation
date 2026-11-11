@@ -1,0 +1,623 @@
+{
+ "units": "inches; plan x east, y north, z up",
+ "ceiling": 96,
+ "cameras": {
+  "photo1": {
+   "loc": [
+    52.3,
+    -183.0,
+    65.8
+   ],
+   "target": [
+    48.7,
+    -87.1,
+    37.4
+   ],
+   "lens": 18.0
+  },
+  "photo2": {
+   "loc": [
+    42.4,
+    1.7,
+    62.9
+   ],
+   "target": [
+    110.0,
+    -64.7,
+    31.0
+   ],
+   "lens": 15.5
+  },
+  "sink": {
+   "loc": [
+    34,
+    -112,
+    62
+   ],
+   "target": [
+    116,
+    -38,
+    44
+   ],
+   "lens": 16
+  },
+  "plan": {
+   "loc": [
+    58.0,
+    -95.5,
+    400
+   ],
+   "target": [
+    58.0,
+    -95.5,
+    0
+   ],
+   "lens": 13.0,
+   "ortho": 231
+  }
+ },
+ "lights": [
+  {
+   "name": "light_galley",
+   "x": 58,
+   "y": -62,
+   "z": 90.2,
+   "power": 45
+  },
+  {
+   "name": "light_sink",
+   "x": 97,
+   "y": -53,
+   "z": 90.5,
+   "power": 45
+  },
+  {
+   "name": "light_nook",
+   "x": 58,
+   "y": -155,
+   "z": 88.3,
+   "power": 45
+  }
+ ],
+ "dims": [
+  {
+   "a": [
+    0,
+    0
+   ],
+   "b": [
+    116,
+    0
+   ],
+   "src": "photo",
+   "off": -14,
+   "label": "116\" (9'8\")",
+   "key": "room_w",
+   "z": null
+  },
+  {
+   "a": [
+    116,
+    0
+   ],
+   "b": [
+    116,
+    -191
+   ],
+   "src": "photo",
+   "off": -8,
+   "label": "191\" (15'11\")",
+   "key": "room_d",
+   "z": null
+  },
+  {
+   "a": [
+    116,
+    0
+   ],
+   "b": [
+    116,
+    -55
+   ],
+   "src": "photo",
+   "off": -30,
+   "label": "55\" (4'7\")",
+   "key": "sink_center",
+   "z": null
+  },
+  {
+   "a": [
+    0,
+    -31.0
+   ],
+   "b": [
+    0,
+    -94.0
+   ],
+   "src": "photo",
+   "off": 30,
+   "label": "63\" (5'3\")",
+   "key": "west_base",
+   "z": null
+  }
+ ],
+ "dimensions": {
+  "ceiling": {
+   "value": 96,
+   "src": "photo",
+   "note": "floor to ceiling",
+   "default": 96,
+   "override": false,
+   "updated": null
+  },
+  "room_w": {
+   "value": 116,
+   "src": "photo",
+   "note": "interior, east-west: two 25\" counters and a 5' aisle (camera solve)",
+   "default": 116,
+   "override": false,
+   "updated": null
+  },
+  "room_d": {
+   "value": 191,
+   "src": "photo",
+   "note": "interior, north-south: hall wall to the eat-in end's wall (camera solve)",
+   "default": 191,
+   "override": false,
+   "updated": null
+  },
+  "west_base": {
+   "value": 63,
+   "src": "photo",
+   "note": "base cabinets between the fridge and the range (camera solve)",
+   "default": 63,
+   "override": false,
+   "updated": null
+  },
+  "micro_z": {
+   "value": 54,
+   "src": "photo",
+   "note": "floor to the over-the-range microwave's bottom",
+   "default": 54,
+   "override": false,
+   "updated": null
+  },
+  "sink_center": {
+   "value": 55,
+   "src": "photo",
+   "note": "north wall to the sink's center",
+   "default": 55,
+   "override": false,
+   "updated": null
+  }
+ },
+ "room": "examples/demo-house/rooms/kitchen",
+ "windows": [
+  {
+   "cx": 118.25,
+   "cy": -53.0,
+   "cz": 61.5,
+   "w": 30,
+   "h": 37,
+   "into": [
+    -1.0,
+    -6.123233995736766e-17
+   ]
+  },
+  {
+   "cx": 118.25000000000001,
+   "cy": -144.0,
+   "cz": 60.0,
+   "w": 32,
+   "h": 48,
+   "into": [
+    -1.0,
+    -6.123233995736766e-17
+   ]
+  }
+ ],
+ "sun": {
+  "dir": [
+   -0.55,
+   0.45,
+   -0.55
+  ]
+ },
+ "walk": {
+  "x0": 28,
+  "x1": 88,
+  "y0": -179,
+  "y1": -8
+ },
+ "objects": [
+  {
+   "name": "window_glass_0",
+   "min": [
+    118.15,
+    -68.0,
+    43.0
+   ],
+   "max": [
+    118.35,
+    -38.0,
+    80.0
+   ]
+  },
+  {
+   "name": "window_rail_0",
+   "min": [
+    117.35,
+    -68.0,
+    60.75
+   ],
+   "max": [
+    119.15,
+    -38.0,
+    62.25
+   ]
+  },
+  {
+   "name": "window_glass_1",
+   "min": [
+    118.15,
+    -160.0,
+    36.0
+   ],
+   "max": [
+    118.35,
+    -128.0,
+    84.0
+   ]
+  },
+  {
+   "name": "window_rail_1",
+   "min": [
+    117.35,
+    -160.0,
+    59.25
+   ],
+   "max": [
+    119.15,
+    -128.0,
+    60.75
+   ]
+  },
+  {
+   "name": "east_base",
+   "min": [
+    90.2,
+    -106.0,
+    0.0
+   ],
+   "max": [
+    116.0,
+    0.0,
+    42.57
+   ]
+  },
+  {
+   "name": "dishwasher",
+   "min": [
+    90.4,
+    -38.9,
+    0.0
+   ],
+   "max": [
+    115.0,
+    -15.1,
+    34.25
+   ]
+  },
+  {
+   "name": "east_upper_0",
+   "min": [
+    102.2,
+    -35.0,
+    54.0
+   ],
+   "max": [
+    116.0,
+    0.0,
+    84.0
+   ]
+  },
+  {
+   "name": "east_upper_1",
+   "min": [
+    102.2,
+    -106.0,
+    54.0
+   ],
+   "max": [
+    116.0,
+    -72.0,
+    84.0
+   ]
+  },
+  {
+   "name": "fridge",
+   "min": [
+    1.0,
+    -30.8,
+    0.5
+   ],
+   "max": [
+    33.4,
+    -1.2,
+    66.0
+   ]
+  },
+  {
+   "name": "west_base",
+   "min": [
+    -0.0,
+    -94.0,
+    0.0
+   ],
+   "max": [
+    25.8,
+    -31.0,
+    40.0
+   ]
+  },
+  {
+   "name": "west_upper",
+   "min": [
+    -0.0,
+    -93.0,
+    54.0
+   ],
+   "max": [
+    13.8,
+    -32.0,
+    84.0
+   ]
+  },
+  {
+   "name": "range",
+   "min": [
+    1.0,
+    -124.0,
+    0.0
+   ],
+   "max": [
+    29.05,
+    -94.0,
+    43.5
+   ]
+  },
+  {
+   "name": "microwave",
+   "min": [
+    -0.0,
+    -124.0,
+    53.95
+   ],
+   "max": [
+    17.7,
+    -94.0,
+    70.5
+   ]
+  },
+  {
+   "name": "switch_hall",
+   "min": [
+    86.82,
+    -0.45,
+    45.75
+   ],
+   "max": [
+    93.19,
+    0.0,
+    50.25
+   ]
+  },
+  {
+   "name": "outlet_e1",
+   "min": [
+    115.61,
+    -22.28,
+    43.75
+   ],
+   "max": [
+    116.0,
+    -17.72,
+    48.25
+   ]
+  },
+  {
+   "name": "outlet_e2",
+   "min": [
+    115.61,
+    -82.28,
+    43.75
+   ],
+   "max": [
+    116.0,
+    -77.72,
+    48.25
+   ]
+  },
+  {
+   "name": "outlet_w1",
+   "min": [
+    -0.0,
+    -90.28,
+    43.75
+   ],
+   "max": [
+    0.39,
+    -85.72,
+    48.25
+   ]
+  },
+  {
+   "name": "outlet_micro",
+   "min": [
+    -0.0,
+    -100.28,
+    70.25
+   ],
+   "max": [
+    0.39,
+    -95.72,
+    74.75
+   ]
+  },
+  {
+   "name": "light_galley_band",
+   "min": [
+    51.85,
+    -68.15,
+    94.8
+   ],
+   "max": [
+    64.15,
+    -55.85,
+    96.0
+   ]
+  },
+  {
+   "name": "light_galley_glass",
+   "min": [
+    52.0,
+    -68.0,
+    91.2
+   ],
+   "max": [
+    64.0,
+    -56.0,
+    94.8
+   ]
+  },
+  {
+   "name": "light_galley_cap",
+   "min": [
+    52.8,
+    -67.2,
+    90.8
+   ],
+   "max": [
+    63.2,
+    -56.8,
+    91.2
+   ]
+  },
+  {
+   "name": "light_sink_ring",
+   "min": [
+    92.2,
+    -57.8,
+    95.4
+   ],
+   "max": [
+    101.8,
+    -48.2,
+    96.0
+   ]
+  },
+  {
+   "name": "light_sink_dome",
+   "min": [
+    92.5,
+    -57.5,
+    91.4
+   ],
+   "max": [
+    101.5,
+    -48.5,
+    95.4
+   ]
+  },
+  {
+   "name": "light_sink_finial",
+   "min": [
+    96.4,
+    -53.6,
+    90.6
+   ],
+   "max": [
+    97.6,
+    -52.4,
+    91.4
+   ]
+  },
+  {
+   "name": "light_nook_canopy",
+   "min": [
+    55.5,
+    -157.5,
+    95.0
+   ],
+   "max": [
+    60.5,
+    -152.5,
+    96.0
+   ]
+  },
+  {
+   "name": "light_nook_stem",
+   "min": [
+    57.75,
+    -155.25,
+    91.0
+   ],
+   "max": [
+    58.25,
+    -154.75,
+    95.0
+   ]
+  },
+  {
+   "name": "light_nook_bowl",
+   "min": [
+    50.5,
+    -162.5,
+    88.9
+   ],
+   "max": [
+    65.5,
+    -147.5,
+    91.1
+   ]
+  },
+  {
+   "name": "light_nook_rim",
+   "min": [
+    50.3,
+    -162.7,
+    90.95
+   ],
+   "max": [
+    65.7,
+    -147.3,
+    91.25
+   ]
+  }
+ ],
+ "bake": "bake.jpg",
+ "baked": [
+  "base",
+  "black_steel",
+  "cabinet",
+  "ceiling",
+  "counter",
+  "display",
+  "enamel_black",
+  "enamel_white",
+  "fixture",
+  "floor",
+  "hall_paint",
+  "kick",
+  "light_galley_glow",
+  "light_nook_glow",
+  "light_sink_glow",
+  "living_paint",
+  "oak_floor",
+  "paint",
+  "plate",
+  "pull",
+  "rubber",
+  "trim"
+ ]
+}
