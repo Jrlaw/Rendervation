@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kitchen Plans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../../../../lib/web/walkthrough.css">
+<link rel="stylesheet" href="../../../../../lib/web/page.css">
+</head>
+<body class="doc">
+<header>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="../../../../../index.html">All rooms</a><span>/</span><span><a href="../../../web/index.html#kitchen">Demo house</a></span><span>/</span><b>Kitchen</b>
+  </nav>
+  <div class="tabs">
+    <a href="index.html">Walk through</a>
+    <a href="index.html#renders">Before / after</a>
+    <a href="index.html#gallery">Renders</a>
+    <a href="plans.html" aria-current="page">Plans</a>
+    <a href="selections.html">Selections</a>
+  </div>
+</header>
+<main class="plans">
+  <div id="plan"></div>
+  <aside>
+    <div>
+      <p class="eyebrow">Show</p>
+      <label><input type="checkbox" data-layer="dims" checked> Dimensions</label>
+      <label><input type="checkbox" data-layer="lights" checked> Recessed lights</label>
+    </div>
+    <div id="dims-box">
+      <p class="eyebrow">Where each number came from</p>
+      <div id="legend"></div>
+      <ul id="dimlist"></ul>
+    </div>
+    <div id="lights-box">
+      <p class="eyebrow">Lights (centers)</p>
+      <ul id="lightlist"></ul>
+    </div>
+    <p class="dims" style="margin:0">Top view, north up. Drawn from layout.py on every export, so it updates as measurements come in.</p>
+  </aside>
+</main>
+<script>window.PLANS = { designs: [["asis", "As it is"], ["new", "New design"]] };</script>
+<script src="scene.js"></script>   <!-- written by render.sh --export web -->
+<script src="../../../../../lib/web/plans.js"></script>
+</body>
+</html>

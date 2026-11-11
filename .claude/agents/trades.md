@@ -40,7 +40,11 @@ judge the evening renders. Plumbing or cabinets: check clearances against the fi
   and where it vents; box locations in tile; fixtures over tubs rated for the spot.
 - **Cabinet designer:** door and drawer swing against walls, the door, and appliances; filler
   strips at walls; counter height; toe kick; reach and storage that actually gets used; the
-  sink centered under the window or mirror; hardware sizes and placement.
+  sink centered under the window or mirror; hardware sizes and placement. Account for every
+  stretch of wall from the counter or appliance up to the ceiling or soffit: above the fridge,
+  above an over-the-range microwave or hood, beside windows. Each one is a cabinet, a shelf or a
+  deliberate choice, never a gap left over from the old kitchen. Upper tops and bottoms line up
+  along a run.
 - **Plumber:** rough-in sizes (toilet 10/12/14", vanity drain and supply heights), clearances
   (15" from a toilet's center to a wall or fixture, 21–24" in front of it), venting, shutoffs,
   access panels, whether a fixture swap moves the drain.
@@ -50,7 +54,9 @@ judge the evening renders. Plumbing or cabinets: check clearances against the fi
 - **General contractor:** what has to be opened up, the order of work, rough cost bands,
   what needs a permit, the riskiest guesses in `layout.py`, and what to tape-measure first.
 - **Interior designer:** proportion, the color and material palette, where the eye lands first,
-  and whether anything looks off in the renders.
+  and whether anything looks off in the renders. Look for what the new design didn't touch:
+  leftovers from the old room (a bare patch of wall, a soffit, an old fixture or appliance kept
+  without a reason) that now look unfinished next to the new work.
 
 Use WebSearch for code rules, product specs, and real products to suggest (with links and
 prices). Say when a rule depends on the local code.

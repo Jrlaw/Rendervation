@@ -46,7 +46,7 @@ BAKE_PX = int(argv[argv.index("--bake") + 1]) if BAKE and argv.index("--bake") +
     and argv[argv.index("--bake") + 1].isdigit() else 8192
 BAKE_SAMPLES = int(arg("--bake-samples", "96"))
 # left live in the walkthrough (view-dependent reflections, transparency); everything else is baked
-BAKE_SKIP = ("glass", "window_glass", "chrome", "nickel", "steel", "mirror", "leaves", "black_glass",
+BAKE_SKIP = ("glass", "window_glass", "chrome", "nickel", "steel", "mirror", "leaves", "black_glass", "brass",
              "acrylic")   # the tub: a curved shell baked in pieces shows their seams as cracks
 NIGHT = "--night" in argv         # evening: room lights dimmed, dark sky, no sun
 # hero: lit like a real-estate photo. Daylight does the work (brighter sky and sun, so the
@@ -629,6 +629,9 @@ def bake_lighting(out):
             outward(bm)
             bm.to_mesh(m)
         bm.free()
+        # textures projected in object space would lose their origin in the join below: keep each object's coordinates
+        attr = m.attributes.new("object_co", "FLOAT_VECTOR", "POINT")
+        attr.data.foreach_set("vector", [c for v in m.vertices for c in v.co])
     # one object: Cycles bakes each selected object in its own pass (a full scene sync each),
     # which for hundreds of objects takes far longer than the bake itself
     bpy.ops.object.select_all(action="DESELECT")
@@ -640,6 +643,15 @@ def bake_lighting(out):
     obj = bpy.context.view_layer.objects.active
     obj.name = "baked"
     mats = {s_.material for s_ in obj.material_slots}
+    for m in mats:
+        if m.use_nodes:
+            for tc in [n for n in m.node_tree.nodes if n.type == "TEX_COORD"]:
+                co = None
+                for link in list(tc.outputs["Object"].links):
+                    if co is None:
+                        co = m.node_tree.nodes.new("ShaderNodeAttribute")
+                        co.attribute_name = "object_co"
+                    m.node_tree.links.new(co.outputs["Vector"], link.to_socket)
     scene.render.bake.margin = 6
 
     def bake(px, samples, margin=6):

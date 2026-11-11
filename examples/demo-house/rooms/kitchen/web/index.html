@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kitchen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../../../../lib/web/walkthrough.css">
+</head>
+<body>
+<header>
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="../../../../../index.html">All rooms</a><span>/</span><span><a href="../../../web/index.html#kitchen">Demo house</a></span><span>/</span><b>Kitchen</b>
+  </nav>
+  <div class="tabs" role="tablist">
+    <button id="tab-walk" role="tab" aria-selected="true" data-tab="walk">Walk through</button>
+    <button id="tab-renders" role="tab" aria-selected="false" data-tab="renders">Before / after</button>
+    <button id="tab-gallery" role="tab" aria-selected="false" data-tab="gallery">Renders</button>
+    <a href="plans.html">Plans</a>
+    <a href="selections.html">Selections</a>
+  </div>
+</header>
+
+<main>
+  <section id="walk">
+    <div id="stage">
+      <div id="loading">Loading the room…</div>
+      <div class="hint"><span id="hint">Drag to look around · tap the floor to walk there</span></div>
+      <div class="views" id="views"></div>
+      <div class="daynight stage-dn" role="group" aria-label="Time of day">
+        <button data-mode="day" aria-pressed="true">Day</button>
+        <button data-mode="night" aria-pressed="false">Evening</button>
+      </div>
+    </div>
+    <aside>
+      <!-- the product list goes first here, from inventory.js (lib/tools/selections_page.py) -->
+      <div>
+        <p class="eyebrow">Layout</p>
+        <p style="margin:0;font-size:0.88rem">9'8" x 15'11", read off two photos (no tape): scaled by a 30" range, a 24" dishwasher and 36" counters, then checked by solving both cameras.</p>
+      </div>
+      <div>
+        <p class="eyebrow">Placeholders to confirm</p>
+        <ul class="assume">
+          <li><span class="pill">photo</span><span>Room size: from the camera solve, no tape</span></li>
+          <li><span class="pill">guess</span><span>Ceiling height 8'</span></li>
+          <li><span class="pill">open</span><span>Kraus sink: listed as discontinued at one store, check stock</span></li>
+        </ul>
+      </div>
+    </aside>
+  </section>
+
+  <section id="renders" hidden>
+    <div class="rhead">
+      <p class="rintro">Drag across a photo to compare the room today with the render from the same spot.</p>
+      <div class="daynight" role="group" aria-label="Time of day">
+        <button data-mode="day" aria-pressed="true">Day</button>
+        <button data-mode="night" aria-pressed="false">Evening</button>
+      </div>
+    </div>
+    <div class="rgrid" id="rgrid"></div>
+  </section>
+
+  <section id="gallery" hidden>
+    <div class="rhead">
+      <p class="rintro">Every saved camera, for the design picked here. Click a picture to see it larger.</p>
+      <div class="daynight" role="group" aria-label="Time of day">
+        <button data-mode="day" aria-pressed="true">Day</button>
+        <button data-mode="night" aria-pressed="false">Evening</button>
+      </div>
+    </div>
+    <div class="rgrid" id="mgrid"></div>
+  </section>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script src="bundle.js"></script>   <!-- model + textures, so the page also opens straight from disk -->
+<script src="inventory.js"></script>   <!-- the room's products, from inventory.json -->
+<script src="../../../../../lib/web/lightbox.js"></script>
+<script src="../../../../../lib/web/walkthrough.js"></script>   <!-- the shared viewer -->
+<script>
+Walkthrough.start({
+  views: [["photo1", "Eat-in end"], ["photo2", "Hall door"], ["sink", "Sink"]],    // walk-through jump points: [camera, label]
+  pairs: [["photo1", "From the eat-in end", 1], ["photo2", "From the hall door", 2]],   // renders/<day|night>/camera.jpg vs before/photoN.jpg
+  more: [["sink", "The sink wall"]],                                 // renders with no matching photo
+  start: "photo1",
+  // design picker: web/ itself (as it is), then web/variants/<id>/ (README: Commands)
+  variants: [["asis", "As it is"], ["new", "New design"]],
+  // how the model's materials look here; uv.world is inches per texture repeat
+  // (the floor is baked; this only marks it as walkable and stands in if the bake is missing)
+  materials: ({ THREE }) => [
+    { match: "floor", material: new THREE.MeshStandardMaterial({ color: 0x8e8b88, roughness: 0.45 }), floor: true },
+  ],
+});
+</script>
+</body>
+</html>
