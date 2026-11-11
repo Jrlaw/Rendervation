@@ -271,7 +271,7 @@ function invShow() {{
   invShow();
 }})));
 if (document.getElementById("inventory")) invShow();
-// ticking off: the box cycles need -> ordered -> have, saved by lib/serve.py into inventory.json
+// ticking off: the box cycles need -> ordered -> have, saved by the server (server/features/inventory.py) into inventory.json
 const NEXT = {{ need: "ordered", ordered: "have", have: "need" }};
 const LOOK = {{ need: ["Still to get", ""], ordered: ["Ordered", "↻"], have: ["Have it", "✓"] }};
 document.querySelectorAll(".inv button.mark").forEach((m) => m.addEventListener("click", async () => {{
@@ -281,7 +281,7 @@ document.querySelectorAll(".inv button.mark").forEach((m) => m.addEventListener(
     const res = await fetch("/api/status", {{ method: "POST", headers: {{ "Content-Type": "application/json" }},
       body: JSON.stringify({{ room: window.INVENTORY.room, group: +li.dataset.g, item: +li.dataset.i, name: li.dataset.name, status: to }}) }});
     const out = await res.json();
-    if (!res.ok || !out.ok) throw new Error(out.error || "not saved");
+    if (!res.ok || !out.ok) throw new Error(out.detail || out.error || "not saved");
     li.dataset.status = to;
     m.className = "mark " + to;
     m.textContent = LOOK[to][1];

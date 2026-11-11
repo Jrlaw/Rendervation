@@ -9,3 +9,6 @@ __pycache__/
 examples/*/rooms/*/renders/*.jpg
 examples/*/rooms/*/web/.bake/
 examples/*/rooms/*/check.json
+# the server's database and the worker's token (lib/serve.sh)
+/data/
+.pytest_cache/

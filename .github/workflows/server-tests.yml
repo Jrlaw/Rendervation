@@ -1,0 +1,16 @@
+# The server's unit and integration tests (server/tests) on every pull request and push to main.
+name: server tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r server/requirements.txt -r server/requirements-test.txt
+      - run: python -m pytest -q server/tests

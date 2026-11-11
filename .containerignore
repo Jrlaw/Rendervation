@@ -1,0 +1,8 @@
+.git
+houses
+examples
+data
+docs
+**/__pycache__
+**/*.blend
+**/*.blend1

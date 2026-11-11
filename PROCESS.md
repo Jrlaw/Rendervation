@@ -182,10 +182,15 @@ isn't offered twice for the same design.
   has no render for is left out. Every design needs `plan.jpg` there (`--cams plan`) for the Plans tab.
   Keep the exact flags behind each design's renders in the README's commands, so a re-render matches
   the bake.
-- **Choosing a design** on the web: the walkthrough's "Make this the choice" button (`lib/serve.sh`
-  running) writes `web/chosen.js`; the walkthrough, Before / after, Renders and Plans then open on
-  it, and the home page's card for the room switches to `web/cards/<id>.jpg` (an 800 px copy of the
-  design's `photo1`, one per design). Record the choice in `selections.md` too.
+- **Choosing and hiding designs** on the web (`lib/serve.sh` running): the walkthrough's "Make this
+  the choice" button and "Hide" next to it are kept in the server's database (docs/backend.md), not in
+  the room's files. The walkthrough, Before / after, Renders and Plans open on the chosen design and leave
+  hidden ones out; the home page's card for the room shows `web/cards/<id>.jpg` (800 px, made from the
+  design's first camera render, or from the 3D view, the first time it's chosen). Record the choice in
+  `selections.md` too. A design to drop for good: hide it on the web, and delete its files only when
+  asked.
+- **Server changes:** run `server/test.sh` before and after; the pre-commit hook runs it too. New
+  editable things get a module in `server/features/` and tests in `server/tests/`.
 - **Plans page** (`web/plans.html`): the top-down render (`--cams plan`) with
   the cans and the dimension lines from `core.dim(...)` calls in `room.py`, each tagged measured /
   plan / photo / design / assumed. Add a `dim` for every measurement that comes in, and re-export.

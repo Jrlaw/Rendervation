@@ -15,14 +15,15 @@ the scripts yourself.
 *How a room goes ([full video](docs/demo.mp4)). The terminal part is illustrated, cut down to
 the requests that matter: one public-domain photo, then plain asks for real products, a
 lighting review and a check. The renders and the website after it are the real output, the
-example room in `examples/demo-house/rooms/hall-bath/`: open http://127.0.0.1:8000 and choose
-**Example**.*
+example room in `examples/demo-house/rooms/hall-bath/`: start the server (below), open
+http://127.0.0.1:8000 and choose **Example**.*
 
 ## Getting started
 
-1. Install [Claude Code](https://claude.com/claude-code) and
-   [Blender](https://www.blender.org/download/) (4.2 or newer, in its default location).
-   You also need Python 3 and Git. On Windows, use WSL or Git Bash.
+1. Install [Claude Code](https://claude.com/claude-code),
+   [Blender](https://www.blender.org/download/) (4.2 or newer, in its default location) and
+   [Podman](https://podman.io/docs/installation) (the web server runs in a container; on Fedora it's
+   already there). You also need Python 3 and Git. On Windows, use WSL or Git Bash.
 2. Clone this repo (`git clone https://github.com/Jrlaw/Rendervation.git`), open a terminal in
    the `Rendervation` folder, and run `claude`.
 3. Say **"set me up"**. Claude checks that Blender renders (and on which GPU), then creates a
@@ -33,10 +34,17 @@ example room in `examples/demo-house/rooms/hall-bath/`: open http://127.0.0.1:80
 
 ## Viewing your rooms
 
-Everything you look at is a web page served from your own machine:
-**http://127.0.0.1:8000**. Ask Claude to "show me the walkthrough" and it starts the server
-and gives you the link. To start it yourself, run `lib/serve.sh` in this folder and leave it
-running.
+Everything you look at is a web page served from your own computer. Ask Claude to "show me the
+walkthrough" and it starts the server and gives you the link. To start it yourself, run this in the
+`Rendervation` folder and leave it running:
+
+```sh
+lib/serve.sh
+```
+
+The first start builds the server's container (a minute or two); after that it's up in seconds.
+Then open **http://127.0.0.1:8000** on this computer, or **http://&lt;computer name&gt;.local:8000**
+from a phone or laptop on the same home network (`hostname` prints the name). Ctrl+C stops it.
 
 - **Home:** every house and room, each with its latest render.
 - **Walkthrough:** walk around the room in 3D. Switch day and evening, flip between designs,
@@ -48,8 +56,44 @@ running.
   products for the design on show and outlines one in the room when you click it. The design notes, per design
   option, sit below; the full log stays in `selections-history.md`.
 
-The server only listens on this machine. You can also open a room's `web/index.html`
-straight from the folder, but correcting dimensions and ticking off products need the server.
+## Changing things on the web
+
+[![Hiding a design in the walkthrough and bringing it back](docs/server-hide.gif)](docs/server-hide.mp4)
+
+*Hiding a design and bringing it back ([video](docs/server-hide.mp4)).*
+
+- **Make this the choice:** under the design pills in the walkthrough. Every tab then opens on that
+  design, and the home page shows its picture.
+- **Hide:** next to it. The design leaves the walkthrough, Before / after, Renders and Plans; its files
+  stay. Hidden designs are listed under **Hidden:**, and clicking one brings it back. The room's own
+  design (As it is) and the chosen one can't be hidden.
+- **Sizes and products:** fix a measurement in the walkthrough (the worker rebuilds the model, then
+  bakes its lighting again in the background), and tick products off in Selections.
+
+![The walkthrough's design controls: the pills, Make this the choice, and the Hidden list](docs/server-hidden.png)
+
+These are kept in a small database on your computer (`data/home-render.db`), with a log of every change.
+Back it up like any other file. You can also open a room's `web/index.html` straight from the folder;
+it shows the room, but changing things needs the server.
+
+There's no sign-in, so keep the server on your home network, not the internet.
+
+## The server (for developers)
+
+FastAPI in a Podman container, SQLite, and a worker on your computer that runs Blender for it.
+[docs/backend.md](docs/backend.md) has the layout and how to add a feature; every endpoint is listed,
+and can be tried, at **http://127.0.0.1:8000/api/docs**.
+
+![The API docs page](docs/server-api.png)
+
+Run the tests before changing anything, and after:
+
+```sh
+server/test.sh                         # unit and integration tests, in the container (~1 s)
+git config core.hooksPath .githooks    # once per clone: run them before every commit
+```
+
+With the hook on, a commit with failing tests stops. GitHub runs the same tests on every pull request.
 
 ## Talking to it
 
