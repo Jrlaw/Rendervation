@@ -6,7 +6,7 @@
                    folder is gone (never deleted: the folder may come back)
   design_settings  a design's label, place and hidden flag, where changed from the room's own list
   changes          every edit: when, who, which room, what
-  jobs             Blender work for the worker on this computer (lib/worker.py)
+  jobs             work for the worker on this computer (lib/worker.py): Blender, house maps, backups
 
 The schema changes through Alembic migrations (server/migrations), run on every start.
 """
@@ -88,6 +88,22 @@ def queue(db, room, kind, after=None):
     db.add(job)
     db.flush()
     return job
+
+
+def backup_on_edit(sessions):
+    """Every commit that logs a Change (an edit on the web) queues a `backup` job: the worker backs the
+    database up into houses/backup/ and commits and pushes it (lib/worker.py)."""
+    @event.listens_for(sessions, "after_flush")
+    def _edited(session, _):
+        if any(isinstance(o, Change) for o in session.new):
+            session.info["edited"] = True
+
+    @event.listens_for(sessions, "after_commit")
+    def _queue(session):
+        if session.info.pop("edited", False):
+            with sessions() as s:
+                queue(s, "houses", "backup")
+                s.commit()
 
 
 def connect(path):

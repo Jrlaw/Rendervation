@@ -3,7 +3,8 @@ and lib/worker.py, running on this computer next to Blender and the GPU, does it
 
   GET  /api/jobs/{id}              the page follows its job: {id, kind, status, seconds, log}
   POST /api/jobs/claim?kind=...    worker: the oldest queued job of that kind, now running (204: none):
-                                   export, bake (a room), or house (rebuild a house's map and its picture)
+                                   export, bake (a room), house (rebuild a house's map and its picture), or
+                                   backup (the database into houses/backup/, committed and pushed)
   POST /api/jobs/{id}/finish       worker: {ok, seconds, log}. A finished export queues the room's bake.
 
 The worker's calls carry the token in data/worker.token (X-Worker-Token), which the server writes on start.
@@ -45,7 +46,7 @@ def get_job(job_id: int, db=Depends(get_db)):
 
 
 @router.post("/api/jobs/claim", dependencies=[Depends(worker)])
-def claim(kind: Literal["export", "bake", "house"], db=Depends(get_db)):
+def claim(kind: Literal["export", "bake", "house", "backup"], db=Depends(get_db)):
     job = db.scalars(select(Job).where(Job.kind == kind, Job.status == "queued").order_by(Job.id)).first()
     if not job:
         return Response(status_code=204)

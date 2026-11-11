@@ -8,6 +8,9 @@ A lane per kind, so a size typed in the walkthrough isn't stuck behind an 8-minu
   house   a house's whole-house map rebuilt (lib/tools/house_map.py) and its home-page picture
           retaken (lib/tools/house_snapshot.py, with Playwright's Chromium: $HR_PLAYWRIGHT_PY),
           queued by the server whenever a room is added or changed
+  backup  after edits on the web: the database into houses/backup/home-render.json
+          (lib/tools/db_backup.py); when houses/ is a git repo with a remote (a developer's setup),
+          only that file is also committed and pushed
 Standard library only.
 """
 import json
@@ -15,6 +18,7 @@ import os
 import shutil
 import subprocess
 import sys
+import importlib.util
 import threading
 import time
 import urllib.error
@@ -24,6 +28,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOOLS = os.path.join(ROOT, "lib", "tools")
 SNAP_PY = os.environ.get("HR_PLAYWRIGHT_PY", os.path.expanduser("~/.cache/home-render/pw-venv/bin/python"))
 URL = "http://127.0.0.1:8000"   # the server, for the snapshot to open (set from the command line)
+BACKUP_WAIT = 30                # seconds: a burst of edits becomes one backup
 SWAP = ("model.glb", "scene.json", "scene.js", "bundle.js", os.path.join("textures", "bake.jpg"))
 FILES = threading.Lock()     # an export and a bake's swap don't write web/ at the same time
 
@@ -75,7 +80,39 @@ def house(hdir, tools=TOOLS, snap_py=None):
     return b.returncode == 0, (log + b.stdout + b.stderr)[-4000:]
 
 
-RUN = {"export": export, "bake": bake, "house": house}
+def backup(hdir, db=None, wait=None):
+    """hdir is the houses folder. Most people's isn't a git repo: the JSON there is the backup. When it
+    is one with a remote, only the backup is committed (`git commit -- <file>`, so nothing else waiting
+    there is swept in) and pushed; a push that fails (offline) goes with the next backup."""
+    time.sleep(BACKUP_WAIT if wait is None else wait)
+    spec = importlib.util.spec_from_file_location("db_backup", os.path.join(TOOLS, "db_backup.py"))
+    tool = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tool)
+    rel = os.path.join("backup", "home-render.json")
+    counts = tool.backup(db or os.path.join(ROOT, "data", "home-render.db"), os.path.join(hdir, rel))
+    log = "backed up " + ", ".join(f"{t} {n}" for t, n in counts.items()) + "\n"
+
+    def git(*args):
+        r = subprocess.run(["git", "-C", hdir, *args], capture_output=True, text=True, timeout=120)
+        return r.returncode, r.stdout + r.stderr
+
+    if not os.path.isdir(os.path.join(hdir, ".git")) or shutil.which("git") is None:
+        return True, log + "houses/ isn't a git repo: the JSON is the backup\n"
+    if not git("remote")[1].strip():
+        return True, log + "houses/ has no remote: nothing to push to\n"
+    git("add", "--", rel)
+    if git("diff", "--cached", "--quiet", "--", rel)[0]:   # changed since the last backup
+        code, out = git("commit", "-q", "-m", "Backup: the database after edits on the web (automatic)", "--", rel)
+        log += out
+        if code:
+            return False, log[-4000:]
+    else:
+        log += "no change since the last backup\n"
+    code, out = git("push", "-q")
+    return code == 0, (log + out)[-4000:]
+
+
+RUN = {"export": export, "bake": bake, "house": house, "backup": backup}
 
 
 def lane(api, kind, root, idle=2.0):

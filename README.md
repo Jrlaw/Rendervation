@@ -87,8 +87,9 @@ from a phone or laptop on the same home network (`hostname` prints the name). Ct
 ![The walkthrough's design controls: the pills, Make this the choice, and the Hidden list](docs/server-hidden.png)
 
 These are kept in a small database on your computer (`data/home-render.db`), with a log of every change.
-Back it up into your private houses repo with `python3 lib/tools/db_backup.py`, then commit and push
-`houses/` (Claude does this when asked). You can also open a room's `web/index.html` straight from the folder;
+After every edit the worker backs it up into `houses/backup/home-render.json`, so keeping a copy of
+`houses/` (another disk, the NAS, cloud storage) keeps your choices too; `python3 lib/tools/db_backup.py --restore`
+brings them back. If `houses/` is a git repo with a remote, the backup is also committed and pushed. You can also open a room's `web/index.html` straight from the folder;
 it shows the room, but changing things needs the server.
 
 There's no sign-in, so keep the server on your home network, not the internet.

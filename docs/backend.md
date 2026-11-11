@@ -43,7 +43,7 @@ rebuilds the Selections page). The status moves into the database next.
 ```
 server/
   app.py           create_app(): settings, database, worker token, each feature's router, the pages
-  config.py        HR_ROOT, HR_DB, HR_TOOLS from the environment
+  config.py        HR_ROOT, HR_DB, HR_TOOLS, HR_WATCH, HR_BACKUP from the environment
   db.py            the tables
   migrate.py       runs the Alembic migrations (migrations/versions) on every start
   catalog.py       houses and rooms: the database list kept in step with the folders
@@ -58,7 +58,7 @@ server/
   tests/           pytest: unit (test_rooms) and integration (test_api, test_worker), on a test house
   Containerfile    python:3.13-slim; the `test` stage adds pytest
 lib/worker.py      the worker: standard library only, runs next to Blender (and Playwright, for map pictures)
-lib/tools/db_backup.py   the database into houses/backup/, for git
+lib/tools/db_backup.py   the database into houses/backup/home-render.json, and back
 lib/serve.sh       builds the image if needed, starts the worker and the container
 server/test.sh     the tests, in the container
 ```
@@ -96,8 +96,8 @@ A failed job isn't retried until the house changes again.
 
 The container has no Blender or GPU, so a size typed into the walkthrough queues an `export` job, and
 `lib/worker.py` (started by `lib/serve.sh`) claims it, runs the room's `render.sh --export web`, and
-reports back. A finished export queues a `bake`. Exports and bakes run in separate lanes, so a quick
-export never waits behind a bake. The worker's calls carry the token the server writes to
+reports back. A finished export queues a `bake`. Each kind of job (export, bake, house, backup) has
+its own lane, so a quick export never waits behind a bake. The worker's calls carry the token the server writes to
 `data/worker.token` on each start. With the worker stopped, jobs wait and the page says so.
 
 ## Network
@@ -115,10 +115,18 @@ GitHub runs the same tests on every pull request (`.github/workflows/server-test
 ## Back up
 
 `data/home-render.db` is the only copy of the choices, room names and card lines, hidden rooms and
-designs, and the change log. Back it up into the private houses repo, then commit and push that:
+designs, and the change log, so it's backed up by itself: every edit on the web queues a `backup`
+job, and the worker, half a minute later (so a burst of edits makes one backup), writes
+`houses/backup/home-render.json`. That's every table's definition and rows except the jobs log,
+sorted, a few kilobytes. `HR_BACKUP=0` turns it off. By hand:
 
     python3 lib/tools/db_backup.py
 
-It writes `houses/backup/home-render.db` (an exact copy, safe while the server runs) and
-`houses/backup/home-render.json` (every table, readable, so the history shows what changed). To
-restore: stop the server, copy the backup to `data/home-render.db`, start it again.
+Copy `houses/` somewhere else (another disk, the NAS, cloud storage) to keep it safe. For a developer
+whose `houses/` is a git repo with a remote, the worker also commits that one file
+(`git commit -- backup/home-render.json`, so nothing else waiting there goes with it) and pushes;
+without git or a remote it just writes the JSON. To restore, stop the server, then:
+
+    python3 lib/tools/db_backup.py --restore
+
+The database there now is kept as `data/home-render.db.before-restore`.
