@@ -1,5 +1,6 @@
-"""Backups: an edit on the web queues one, lib/tools/db_backup.py writes the JSON and restores from it,
+"""Backups: once a day after edits on the web, lib/tools/db_backup.py writes the JSON and restores from it,
 and the worker commits only the backup in the houses repo and pushes it."""
+import datetime
 import importlib.util
 import json
 import os
@@ -39,22 +40,45 @@ def live_db(tmp_path):
     return path
 
 
-def test_an_edit_queues_one_backup(root):
+def test_an_edit_queues_a_backup_on_the_next_sync(root):
     from fastapi.testclient import TestClient
 
-    from server.app import create_app
+    from server.app import create_app, sync_now
     from server.config import Settings
     app = create_app(Settings(root=str(root), db=str(root / "data/b.db"), tools="", watch=0, backup=True))
     with TestClient(app) as client:
         client.get("/api/houses")
+        sync_now(app)
         assert backups(app) == []                                  # reading isn't an edit
         client.patch(f"/api/rooms/{DEN}", json={"name": "Den"})
         client.put(f"/api/rooms/{DEN}/choice", json={"design": "asis"})
-        assert backups(app) == ["queued"]                          # two edits, one backup waiting
+        assert backups(app) == []                                  # not on each edit
+        sync_now(app)
+        sync_now(app)
+        assert backups(app) == ["queued"]                          # two edits, one backup
+
+
+def test_backups_are_daily(tmp_path):
+    _, sessions = dbm.connect(str(tmp_path / "d.db"))
+    day = datetime.timedelta(days=1)
+    with sessions() as s:
+        t0 = dbm.now()
+        assert dbm.backup_due(s, t0) is None                        # nothing edited yet
+        s.add(dbm.Change(user="local", room="r", what="rename", detail={}, at=t0))
+        job = dbm.backup_due(s, t0 + datetime.timedelta(minutes=1))
+        job.status, job.created = "done", t0 + datetime.timedelta(minutes=1)
+        s.add(dbm.Change(user="local", room="r", what="rename", detail={}, at=t0 + datetime.timedelta(hours=2)))
+        assert dbm.backup_due(s, t0 + datetime.timedelta(hours=3)) is None   # edited again, but not a day yet
+        assert dbm.backup_due(s, t0 + day + datetime.timedelta(minutes=2)) is not None
+        s.query(dbm.Job).delete()
+        s.add(dbm.Job(room="houses", kind="backup", status="done", created=t0 + datetime.timedelta(hours=3)))
+        assert dbm.backup_due(s, t0 + 3 * day) is None              # nothing edited since the last one
 
 
 def test_backups_off(client, app):
+    from server.app import sync_now
     client.patch(f"/api/rooms/{DEN}", json={"name": "Den"})
+    sync_now(app)
     assert backups(app) == []                                      # the test app has HR_BACKUP off
 
 
@@ -106,13 +130,13 @@ def houses_repo(tmp_path):
 def test_worker_commits_only_the_backup_and_pushes(tmp_path):
     remote, houses = houses_repo(tmp_path)
     (houses / "notes.md").write_text("work in progress\n")         # someone's uncommitted work
-    ok, log = worker_mod.backup(str(houses), db=live_db(tmp_path), wait=0)
+    ok, log = worker_mod.backup(str(houses), db=live_db(tmp_path))
     assert ok, log
     assert git(remote, "log", "--format=%s", "-1") == "Backup: the database after edits on the web (automatic)\n"
     assert git(houses, "show", "--name-only", "--format=", "HEAD").split() == ["backup/home-render.json"]
     assert git(houses, "status", "--short") == " M notes.md\n"     # left as it was
 
-    ok, log = worker_mod.backup(str(houses), db=str(tmp_path / "live.db"), wait=0)
+    ok, log = worker_mod.backup(str(houses), db=str(tmp_path / "live.db"))
     assert ok and "no change" in log
     assert git(remote, "rev-list", "--count", "HEAD") == "2\n"     # no empty commit
 
@@ -120,7 +144,7 @@ def test_worker_commits_only_the_backup_and_pushes(tmp_path):
 def test_worker_backup_push_failure_is_reported(tmp_path):
     remote, houses = houses_repo(tmp_path)
     git(houses, "remote", "set-url", "origin", str(tmp_path / "nowhere.git"))
-    ok, log = worker_mod.backup(str(houses), db=live_db(tmp_path), wait=0)
+    ok, log = worker_mod.backup(str(houses), db=live_db(tmp_path))
     assert not ok
     assert git(houses, "log", "--format=%s", "-1").startswith("Backup:")   # committed; pushed next time
 
@@ -129,7 +153,7 @@ def test_worker_backup_without_git(tmp_path):
     """Most people's houses/ isn't a git repo: the JSON is written and that's the backup."""
     houses = tmp_path / "houses"
     houses.mkdir()
-    ok, log = worker_mod.backup(str(houses), db=live_db(tmp_path), wait=0)
+    ok, log = worker_mod.backup(str(houses), db=live_db(tmp_path))
     assert ok and "isn't a git repo" in log
     assert json.loads((houses / "backup/home-render.json").read_text())["tables"]["rooms"][0]["name"] == "Office"
 
@@ -138,5 +162,5 @@ def test_worker_backup_git_without_remote(tmp_path):
     houses = tmp_path / "houses"
     houses.mkdir()
     subprocess.run(["git", "init", "-q", str(houses)], check=True)
-    ok, log = worker_mod.backup(str(houses), db=live_db(tmp_path), wait=0)
+    ok, log = worker_mod.backup(str(houses), db=live_db(tmp_path))
     assert ok and "no remote" in log

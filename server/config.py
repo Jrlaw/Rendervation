@@ -5,7 +5,7 @@ and in the tests:
   HR_DB    the SQLite file (default: $HR_ROOT/data/home-render.db)
   HR_TOOLS lib/tools, for the page builders the server runs (default: this repo's)
   HR_WATCH seconds between checks of the folders for added or changed rooms (default 30; 0: off)
-  HR_BACKUP 1: every edit queues a backup of the database into houses/backup/ (default); 0: off
+  HR_BACKUP 1: a daily backup of the database into houses/backup/, when something was edited (default); 0: off
 """
 import os
 from dataclasses import dataclass

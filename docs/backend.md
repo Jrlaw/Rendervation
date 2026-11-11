@@ -115,10 +115,10 @@ GitHub runs the same tests on every pull request (`.github/workflows/server-test
 ## Back up
 
 `data/home-render.db` is the only copy of the choices, room names and card lines, hidden rooms and
-designs, and the change log, so it's backed up by itself: every edit on the web queues a `backup`
-job, and the worker, half a minute later (so a burst of edits makes one backup), writes
+designs, and the change log, so it's backed up by itself: once a day, if anything was edited on the
+web since the last backup, the server queues a `backup` job and the worker writes
 `houses/backup/home-render.json`. That's every table's definition and rows except the jobs log,
-sorted, a few kilobytes. `HR_BACKUP=0` turns it off. By hand:
+sorted, a few kilobytes. `HR_BACKUP=0` turns it off. By hand, any time (say, after a big session):
 
     python3 lib/tools/db_backup.py
 

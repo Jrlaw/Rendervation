@@ -225,7 +225,7 @@ house too:** put it in `house_layout.py` with `folder=` set. With the server run
 data and its home-page picture are rebuilt by themselves within half a minute of any change (a
 `house` job, docs/backend.md); a house without `house_layout.py` gets one, built from what its rooms
 already place around them. The home page's cards, links and "N modeled" count come from the server.
-The database backs itself up into `houses/backup/home-render.json` after edits on the web (committed and pushed, in John's setup); commit the rest of `houses/` after a session. When two rooms that touch both exist, it
+The database backs itself up into `houses/backup/home-render.json` once a day after edits on the web (committed and pushed, in John's setup); after a big session run `python3 lib/tools/db_backup.py` and commit `houses/`. When two rooms that touch both exist, it
 also records where each room sits in house coordinates: an origin and a rotation, plus which
 doorway connects them. Until then, each room is modeled in its own coordinates, and anything
 seen through a doorway is a simple stand-in (as the bedroom was before it was built out for

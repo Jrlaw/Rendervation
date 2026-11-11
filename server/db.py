@@ -90,20 +90,22 @@ def queue(db, room, kind, after=None):
     return job
 
 
-def backup_on_edit(sessions):
-    """Every commit that logs a Change (an edit on the web) queues a `backup` job: the worker backs the
-    database up into houses/backup/ and commits and pushes it (lib/worker.py)."""
-    @event.listens_for(sessions, "after_flush")
-    def _edited(session, _):
-        if any(isinstance(o, Change) for o in session.new):
-            session.info["edited"] = True
+BACKUP_EVERY = datetime.timedelta(days=1)
 
-    @event.listens_for(sessions, "after_commit")
-    def _queue(session):
-        if session.info.pop("edited", False):
-            with sessions() as s:
-                queue(s, "houses", "backup")
-                s.commit()
+
+def backup_due(db, at=None):
+    """Queue a `backup` job (lib/worker.py: the database into houses/backup/) once a day at most, and
+    only when something was edited since the last one. Checked with each sync (app.watch)."""
+    at = at or now()
+    last = db.scalars(select(Job).where(Job.kind == "backup").order_by(Job.created.desc())).first()
+    if last and at - last.created < BACKUP_EVERY:
+        return None
+    edited = select(Change.id)
+    if last:
+        edited = edited.where(Change.at > last.created)
+    if db.scalars(edited.limit(1)).first() is None:
+        return None
+    return queue(db, "houses", "backup")
 
 
 def connect(path):

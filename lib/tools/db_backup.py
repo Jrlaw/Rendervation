@@ -1,5 +1,5 @@
 """Back up the server's database (data/home-render.db) into houses/ as JSON, so a copy of houses/
-keeps it too. The server's worker does this by itself after every edit on the web (and, when
+keeps it too. The server's worker does this by itself once a day after edits on the web (and, when
 houses/ is a git repo with a remote, commits and pushes it); by hand:
 
     python3 lib/tools/db_backup.py                       # writes houses/backup/home-render.json

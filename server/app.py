@@ -60,6 +60,9 @@ def watch(app):
 def sync_now(app):
     with app.state.sessions() as session:
         catalog.sync(session, app.state.settings.root)
+        if app.state.settings.backup:
+            db.backup_due(session)
+            session.commit()
 
 
 def create_app(settings=None):
@@ -69,8 +72,6 @@ def create_app(settings=None):
     app.router.lifespan_context = watch(app)
     app.state.settings = settings
     app.state.engine, app.state.sessions = db.connect(settings.db)
-    if settings.backup:
-        db.backup_on_edit(app.state.sessions)
     # the worker (lib/worker.py) reads this to claim jobs; a new one each start
     app.state.worker_token = secrets.token_urlsafe(24)
     token = os.path.join(settings.data, "worker.token")
