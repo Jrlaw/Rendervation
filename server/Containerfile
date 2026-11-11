@@ -1,0 +1,19 @@
+# The web server. lib/serve.sh builds and runs it with the repo mounted at /srv (so pages, renders and
+# code edits show at once); the copies below let the image run by itself too.
+FROM docker.io/library/python:3.13-slim AS base
+WORKDIR /srv
+COPY server/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+COPY index.html /srv/
+COPY lib /srv/lib
+COPY template /srv/template
+COPY server /srv/server
+ENV HR_ROOT=/srv PYTHONDONTWRITEBYTECODE=1
+EXPOSE 8000
+CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# server/test.sh: the unit and integration tests, in the same image
+FROM base AS test
+COPY server/requirements-test.txt /tmp/requirements-test.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-test.txt
+CMD ["python", "-m", "pytest", "-q", "server/tests"]

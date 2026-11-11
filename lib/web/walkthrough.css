@@ -179,6 +179,10 @@ main > section[hidden] { display: none !important; }      /* #walk's display: fl
 /* dimensions: toggle, labels on the 3D lines, and the correction form */
 .stage-dims { order: 3; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
 .stage-choose { order: 2; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }   /* under the design pills */
+.stage-hidden { order: 2; flex-wrap: wrap; align-items: center; border-radius: 18px; }   /* hidden designs, to bring back */
+.stage-hidden span { font: 500 0.8rem var(--font-body); color: var(--muted); padding: 0 4px 0 10px; }
+.stage-hidden button { opacity: 0.75; text-decoration: line-through; }
+.stage-hidden button:hover { opacity: 1; text-decoration: none; }
 .dimlabels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .dimlabel { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; white-space: nowrap;
   font: 600 0.78rem var(--font-body); color: #fff; background: rgb(24 21 18 / 0.85); border: 0;
