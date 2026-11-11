@@ -165,3 +165,32 @@ def test_api_docs(client):
     assert client.get("/api/docs").status_code == 200
     paths = client.get("/api/openapi.json").json()["paths"]
     assert "/api/rooms/{room}/designs" in paths and "/api/dimension" in paths
+
+
+def test_every_page_gets_the_nav_bar(client, root):
+    (root / "houses/test/web/plans.html").write_text(
+        '<!doctype html><html><head><title>Plans</title></head>\n<body class="doc"><h1>Plans</h1></body></html>')
+    r = client.get("/houses/test/web/plans.html")
+    nav = r.text.index('<nav class="rv-nav"')
+    assert r.text.index('<body class="doc">') < nav < r.text.index("<h1>Plans</h1>")   # first in the body
+    assert 'href="/"' in r.text and 'href="https://github.com/Jrlaw/Rendervation"' in r.text
+    head = r.text[:r.text.index("</head>")]
+    assert '/lib/web/nav.css' in head and 'rel="icon" href="/lib/web/logo.svg"' in head
+    assert r.headers["cache-control"] == "no-cache"
+    assert client.get("/lib/web/walkthrough.js").text == "// viewer"     # only pages
+
+
+def test_nav_bar_once_and_a_page_keeps_its_own_icon():
+    from server.app import with_nav
+    page = '<html><head><link rel="icon" href="me.png"></head><body><p>Hi</p></body></html>'
+    once = with_nav(page)
+    assert with_nav(once) == once and once.count("rv-nav") == 1
+    assert "logo.svg" not in once.split("<body>")[0]                     # its own tab icon stays
+
+
+def test_the_nav_bar_files_exist():
+    import os
+
+    from server.config import REPO
+    for f in ("lib/web/nav.css", "lib/web/logo.svg"):
+        assert os.path.isfile(os.path.join(REPO, f)), f

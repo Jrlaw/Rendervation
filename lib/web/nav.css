@@ -1,0 +1,24 @@
+/* The bar across the top of every page: the program's name (home) and its GitHub repo. The server
+   adds it to each page it sends (server/app.py, Pages), so pages don't carry it themselves. Its own
+   colors, so it looks the same on every page whatever that page's stylesheet. */
+.rv-nav {
+  --rv-bg: #2a2522; --rv-ink: #f3f1ec; --rv-muted: #b9afa4; --rv-accent: #e0a87e;
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  min-height: 44px; box-sizing: border-box; margin: 0;
+  padding-block: 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--rv-bg); color: var(--rv-ink);
+  font: 500 14px/1.2 "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+}
+/* edge to edge on every page: no browser margin around the body (the room pages had 8px) */
+body { margin: 0; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .rv-nav { --rv-bg: #110e0c; }
+}
+:root[data-theme="dark"] .rv-nav { --rv-bg: #110e0c; }
+.rv-nav a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; padding: 6px 0; }
+.rv-nav .rv-name { font: 700 17px/1 "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif; letter-spacing: -0.01em; }
+.rv-nav .rv-name svg { color: var(--rv-accent); }
+.rv-nav .rv-links a { color: var(--rv-muted); }
+.rv-nav a:hover, .rv-nav .rv-links a:hover { color: var(--rv-ink); }
+.rv-nav a:focus-visible { outline: 2px solid var(--rv-accent); outline-offset: 2px; border-radius: 4px; }
+@media print { .rv-nav { display: none; } }
