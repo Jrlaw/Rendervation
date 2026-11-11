@@ -1,10 +1,14 @@
 """The database: SQLite through SQLAlchemy. It holds what's changed on the web; what a room *has*
 (its designs, cameras, models, renders) stays in its files, and these tables record edits on top.
 
+  houses           each house: name, card text, place on the home page
+  rooms            each room: house, name, card text, place, hidden, chosen design; `missing` when its
+                   folder is gone (never deleted: the folder may come back)
   design_settings  a design's label, place and hidden flag, where changed from the room's own list
-  rooms            each room's chosen design
   changes          every edit: when, who, which room, what
   jobs             Blender work for the worker on this computer (lib/worker.py)
+
+The schema changes through Alembic migrations (server/migrations), run on every start.
 """
 import datetime
 
@@ -20,10 +24,25 @@ class Base(DeclarativeBase):
     pass
 
 
+class House(Base):
+    __tablename__ = "houses"
+    house: Mapped[str] = mapped_column(String, primary_key=True)         # houses/<house> or examples/<house>
+    name: Mapped[str] = mapped_column(String)
+    blurb: Mapped[str | None] = mapped_column(String, nullable=True)     # the whole-house card's line
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    missing: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
 class RoomRow(Base):
     __tablename__ = "rooms"
     room: Mapped[str] = mapped_column(String, primary_key=True)          # houses/<house>/rooms/<room>
     chosen: Mapped[str | None] = mapped_column(String, nullable=True)
+    house: Mapped[str | None] = mapped_column(String, nullable=True)
+    name: Mapped[str | None] = mapped_column(String, nullable=True)
+    blurb: Mapped[str | None] = mapped_column(String, nullable=True)     # the card's line under the name
+    position: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    hidden: Mapped[bool] = mapped_column(Boolean, default=False)
+    missing: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class DesignSetting(Base):
@@ -60,7 +79,7 @@ class Job(Base):
 
 
 def connect(path):
-    """An engine and session factory on the SQLite file at path, tables created if new."""
+    """An engine and session factory on the SQLite file at path, migrated to the latest schema."""
     engine = create_engine(f"sqlite:///{path}", connect_args={"check_same_thread": False})
 
     @event.listens_for(engine, "connect")
@@ -68,5 +87,6 @@ def connect(path):
         conn.execute("PRAGMA journal_mode=WAL")    # pages read while the worker writes
         conn.execute("PRAGMA foreign_keys=ON")
 
-    Base.metadata.create_all(engine)
+    from .migrate import upgrade
+    upgrade(engine)
     return engine, sessionmaker(engine, expire_on_commit=False)

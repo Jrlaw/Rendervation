@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from . import config, db
+from . import catalog, config, db
 from .features import FEATURES
 
 SERVED = ("index.html", "houses/", "examples/", "lib/web/", "template/")
@@ -47,6 +47,8 @@ def create_app(settings=None):
     with open(token, "w") as f:
         f.write(app.state.worker_token)
     os.chmod(token, 0o600)
+    with app.state.sessions() as session:   # houses and rooms: the folders' list, in the database
+        catalog.sync(session, settings.root)
     for feature in FEATURES:
         app.include_router(feature.router)
     app.mount("/", Pages(directory=settings.root, html=True), name="pages")

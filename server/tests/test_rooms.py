@@ -26,7 +26,6 @@ def test_read_room(root):
     r = read_room(str(root), DEN)
     assert r.own == [("asis", "As it is"), ("mcm", "Mid-century"), ("open", "Open corner")]
     assert r.camera == "photo1"
-    assert r.house_index == "houses/index.html"
     assert read_room(str(root), "houses/test/rooms/nothere") is None
 
 
@@ -36,7 +35,7 @@ def test_room_with_one_design(root):
 
 
 def test_find_rooms(root):
-    assert [r.rel for r in find_rooms(str(root))] == ["houses/test/rooms/attic", DEN]
+    assert [r.rel for r in find_rooms(str(root))] == ["houses/test/rooms/attic", DEN, "examples/demo/rooms/bath"]
 
 
 @pytest.fixture

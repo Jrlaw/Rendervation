@@ -12,12 +12,12 @@ in order, and a room can stop at any step.
 
 1. Copy `template/room/` to `houses/<house>/rooms/<room>/`. Use short lowercase names with
    dashes, for example `houses/ours/rooms/main-bath`. `houses/` is the person's own private
-   repo (`houses/README.md`); if it doesn't exist yet, create it there and copy
-   `template/home.html` to `houses/index.html`.
+   repo (`houses/README.md`); if it doesn't exist yet, create it there.
 2. If the house is new, copy `template/house/` to `houses/<house>/` and fill in `house.md`
    (the map in `house_layout.py` is optional).
-3. Add the room to `houses/<house>/house.md` and to the home page (`houses/index.html`).
-   If the house has a map (`house_layout.py`), set `folder=` on the room's entry and rebuild it.
+3. Add the room to `houses/<house>/house.md`. The home page lists it by itself once its
+   `web/index.html` exists (the server's database, `server/catalog.py`); give it its name and card
+   line there with **Edit**, or `PATCH /api/rooms/<room>`. If the house has a map (`house_layout.py`), set `folder=` on the room's entry and rebuild it.
 4. Fill in the room's README header: house, start date, status, what the project is.
 5. Give the person the shot list and measurement sheet from `intake/README.md` in chat. Keep it
    short, and point out the "no floor plan" option.
@@ -221,10 +221,9 @@ whole-house map before any are modeled: trace the outlines into `houses/<house>/
 (`template/house/house_layout.py` shows the format), run `python3 lib/tools/house_map.py houses/<house>`, and open
 `houses/<house>/web/index.html`. Starting a room that's on the map: use its id as the folder
 name, then set `folder=` on its entry and rebuild the map. **Whenever a room is added, update the whole
-house too:** rebuild the map (it also updates the "N modeled" count on the home page), retake the
-home page's map picture with `lib/tools/house_snapshot.py houses/<house>` (server running), and add
-the room's card to `houses/index.html` with the same links as the others (Walk through, Renders,
-Plans, Selections). When two rooms that touch both exist, it
+house too:** rebuild the map and retake the home page's map picture with
+`lib/tools/house_snapshot.py houses/<house>` (server running). The home page's cards, links and
+"N modeled" count come from the server. When two rooms that touch both exist, it
 also records where each room sits in house coordinates: an origin and a rotation, plus which
 doorway connects them. Until then, each room is modeled in its own coordinates, and anything
 seen through a doorway is a simple stand-in (as the bedroom was before it was built out for

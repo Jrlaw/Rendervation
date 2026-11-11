@@ -23,10 +23,6 @@ class Room:
     own: list     # [(id, label)] from web/index.html, in order; [] for a room with one design
     camera: str | None   # the room's first camera (pairs, else views): the card's view
 
-    @property
-    def house_index(self):   # houses/index.html or examples/index.html: the cards
-        return self.rel.split("/")[0] + "/index.html"
-
 
 def room_path(rel):
     """houses/<house>/rooms/<room> (or examples/...) normalized, or None if it isn't one."""
@@ -107,7 +103,7 @@ def chosen(db, room):
 
 
 def card_url(room, design):
-    """The room's home-page picture for a design, relative to the house index, if there is one."""
+    """The room's home-page picture for a design, if it has one."""
     if design and os.path.isfile(os.path.join(room.dir, "web", "cards", design + ".jpg")):
-        return room.rel.split("/", 1)[1] + f"/web/cards/{design}.jpg"
+        return f"/{room.rel}/web/cards/{design}.jpg"
     return None
