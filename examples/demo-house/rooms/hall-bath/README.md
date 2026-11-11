@@ -20,6 +20,7 @@ Every step here was done by Claude Code in a single session, the same way it run
 - `intake/`: the photo, where it came from, and the sizes read off it (`intake/README.md`);
   `intake/products/` has the saved product photos.
 - `selections.md`: every product, chosen or not, with links and prices.
+- `inventory.json`: the products to buy, per design, and where each is in the model.
 - `layout.py`: every dimension (inches), each tagged MEASURED / FROM PLAN / FROM PHOTO / ASSUMED
   / DESIGN.
 - `room.py`: builds the room in Blender from `layout.py` and `lib/roomkit`.

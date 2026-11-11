@@ -35,14 +35,7 @@
       </div>
     </div>
     <aside>
-      <!-- one .item per chosen product, from selections.md (swatch: a texture or a CSS color) -->
-      <div>
-        <p class="eyebrow">Selections</p>
-        <div class="items">
-          <div class="item"><div class="swatch" style="background:#e9e3d8"></div>
-            <div><b>Nothing chosen yet</b><span class="dims">see selections.md</span></div></div>
-        </div>
-      </div>
+      <!-- the product list goes first here, from inventory.js (lib/tools/selections_page.py) -->
       <div>
         <p class="eyebrow">Layout</p>
         <p style="margin:0;font-size:0.88rem">ROOM SIZE and where it came from (tape, plan, or photos).</p>
@@ -86,6 +79,7 @@
 } }
 </script>
 <script src="bundle.js"></script>   <!-- model + textures, so the page also opens straight from disk -->
+<script src="inventory.js"></script>   <!-- the room's products, from inventory.json -->
 <script src="../../../../../lib/web/lightbox.js"></script>
 <script src="../../../../../lib/web/walkthrough.js"></script>   <!-- the shared viewer -->
 <script>

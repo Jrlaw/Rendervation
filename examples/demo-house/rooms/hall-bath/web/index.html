@@ -35,26 +35,7 @@
       </div>
     </div>
     <aside>
-      <!-- one .item per chosen product, from selections.md (swatch: a texture or a CSS color) -->
-      <div>
-        <p class="eyebrow">Selections</p>
-        <div class="items">
-          <div class="item"><div class="swatch" style="background:#2f4a33"></div>
-            <div><b>Bedrosians Cloe, Green</b><span class="dims">2.5x8 glossy ceramic, to 54" and around the tub</span></div></div>
-          <div class="item"><div class="swatch" style="background:url(textures/carrara_hex.jpg) 0 0/160px"></div>
-            <div><b>Merola Classico Carrara Hexagon</b><span class="dims">7x8 porcelain floor</span></div></div>
-          <div class="item"><div class="swatch" style="background:#8f9097"></div>
-            <div><b>Glacier Bay Shaila 30", Silverleaf</b><span class="dims">16.25" deep so the door clears it, PPSOFSVL30</span></div></div>
-          <div class="item"><div class="swatch" style="background:linear-gradient(135deg,#dfe3e6,#9aa3a8)"></div>
-            <div><b>Gatco Designer oval mirror</b><span class="dims">24 x 32 frameless, 5079LG</span></div></div>
-          <div class="item"><div class="swatch" style="background:#f4f3ef"></div>
-            <div><b>Kohler Cimarron toilet</b><span class="dims">round front, 1.28 gpf, K-3851</span></div></div>
-          <div class="item"><div class="swatch" style="background:radial-gradient(circle,#fff6e2 30%,#e9e6e0 32%)"></div>
-            <div><b>Halo 4" wafers x3, Kichler bar</b><span class="dims">2700 K, from the lighting review</span></div></div>
-          <div class="item"><div class="swatch" style="background:linear-gradient(135deg,#e8e6e1,#a9a59c)"></div>
-            <div><b>Delta Foundations tub/shower</b><span class="dims">valve included, B114900C-SS, from the check</span></div></div>
-        </div>
-      </div>
+      <!-- the product list goes first here, from inventory.js (lib/tools/selections_page.py) -->
       <div>
         <p class="eyebrow">Layout</p>
         <p style="margin:0;font-size:0.88rem">5'6" x 8'0", read off one photo (no tape): scaled by the 4-1/4" tiles, a 60" tub and an 80" door.</p>
@@ -101,6 +82,7 @@
 } }
 </script>
 <script src="bundle.js"></script>   <!-- model + textures, so the page also opens straight from disk -->
+<script src="inventory.js"></script>   <!-- the room's products, from inventory.json -->
 <script src="../../../../../lib/web/lightbox.js"></script>
 <script src="../../../../../lib/web/walkthrough.js"></script>   <!-- the shared viewer -->
 <script>

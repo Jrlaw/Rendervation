@@ -192,3 +192,24 @@ main > section[hidden] { display: none !important; }      /* #walk's display: fl
   color: var(--ink); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
 .dimbtns button[type="submit"] { background: var(--oak); color: var(--oak-ink); border-color: var(--oak); }
 .dimlabel.measure { border-left-color: #f2b134; pointer-events: none; font-size: 0.84rem; }
+
+/* products (inventory.json): status marks, the sidebar list (the .item rows above), the label on the outlined product */
+.mark { display: inline-grid; place-items: center; flex: none; width: 16px; height: 16px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;
+  box-sizing: border-box; margin-right: 6px; vertical-align: -2px; }
+.mark.have { background: #2e7d32; color: #fff; }
+.mark.ordered { border: 2px solid var(--warn); color: var(--warn); border-radius: 50%; }
+.mark.need { border: 2px solid var(--muted); }
+.products .eyebrow a { color: var(--oak); text-transform: none; letter-spacing: 0; margin-left: 6px; }
+.prodfilter { width: fit-content; margin-bottom: 10px; font-size: 0.8rem; }
+.prodfilter button { padding: 2px 9px; }
+.prodfilter button[aria-selected="true"] { background: var(--surface); }
+.prodgroup { margin-bottom: 14px; }
+.prodgroup[hidden], .prod[hidden] { display: none; }
+.prodhead { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 600; margin: 0 0 6px; }
+button.item.prod { font: inherit; color: var(--ink); text-align: left; background: none; border: 0; border-radius: 8px; padding: 4px; margin: -4px; cursor: pointer; }
+button.item.prod:hover, button.item.prod[aria-pressed="true"] { background: var(--chip); }
+button.item.prod[aria-pressed="true"] { box-shadow: inset 3px 0 0 #2f7df6; }
+button.item.prod.off .swatch { opacity: .6; }
+.dimlabel.prodlabel { border-left-color: #2f7df6; cursor: pointer; pointer-events: auto; }
+.proddetail { display: block; margin: -8px 0 0 52px; font-size: 13px; color: var(--oak); }
+.proddetail[hidden] { display: none; }

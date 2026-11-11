@@ -45,7 +45,8 @@ the selections page and the local server (`lib/serve.sh`, http://127.0.0.1:8000)
 
 - **Log every product, link, suggestion and choice in the room's `selections.md` as it happens.**
   Do this before modeling it. It lists what's current; passed-on options go in `selections-history.md` with the reason. Save
-  product photos to `intake/products/`.
+  product photos to `intake/products/`. Once a product is picked, add it to `inventory.json` too (status, price, picture,
+  and `where`: its object names in the model), so it shows on the Selections checklist and in the walkthrough's sidebar.
 - **Tag every dimension** in `layout.py` MEASURED / FROM PLAN / FROM PHOTO / ASSUMED. With no
   floor plan, estimate from photos against known sizes, and ask for one or two specific
   measurements to settle conflicts.

@@ -9,6 +9,7 @@ What the project is (keeping the room as is, a refresh, or a full remodel) and w
 - `intake/`: photos, floor plan, measurements and notes about the room as it is today
   (`intake/README.md`).
 - `selections.md`: what's current, per design option. `selections-history.md`: the log, with options passed on.
+- `inventory.json`: the products to buy, each with have / ordered / need and where it is in the model.
 - `layout.py`: every dimension (inches), each tagged MEASURED / FROM PLAN / FROM PHOTO / ASSUMED.
 - `room.py`: builds the room in Blender from `layout.py` and `lib/roomkit`.
 - `textures/`: product textures cut from photos.
@@ -33,7 +34,8 @@ As-is views, the "before" (PROCESS.md step 2; same cameras as the standard views
     ./render.sh --design asis --cams photo1 --samples 64 --res 1600 --out renders/asis/day
     ./render.sh --design asis --night --cams photo1 --samples 64 --res 1600 --out renders/asis/night
 
-Selections page (after editing `selections.md`; run from the repo root):
+Selections page and the walkthrough's product list (after editing `selections.md` or `inventory.json`; run from
+the repo root):
 
     python3 lib/tools/selections_page.py houses/<house>/rooms/<room>
 
