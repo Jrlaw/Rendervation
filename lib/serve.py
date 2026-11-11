@@ -17,11 +17,19 @@ And one the Selections checklist uses to tick a product off:
 
 It sets that product's status in the room's inventory.json (the name must match, so a stale page
 can't change the wrong one) and rebuilds the Selections page and web/inventory.js.
+
+And one the walkthrough's "Make this the choice" button uses:
+
+  POST /api/choose  {"room": "houses/<house>/rooms/<room>", "design": "layout_i"}
+
+It writes the room's web/chosen.js (the walkthrough and Plans open on that design) and, when the
+room has web/cards/<design>.jpg, makes that the room's picture on the house's home page.
 """
 import datetime
 import http.server
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -111,9 +119,40 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         print(f"status {room}: {req['name']} -> {req['status']}", flush=True)
         self.reply(200 if run.returncode == 0 else 500, {"ok": run.returncode == 0, "log": run.stderr[-2000:]})
 
+    def choose(self):
+        try:
+            req = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+            room, rdir, ok = self.room_dir(req)
+            design = str(req["design"])
+            with open(os.path.join(rdir, "web", "index.html")) as f:
+                ids = re.findall(r'\["([\w-]+)", "[^"]*"\]', re.search(r"variants: (\[.*?\]\]),", f.read(), re.S).group(1))
+            if not ok or design not in ids:
+                return self.reply(400, {"error": "not one of this room's designs"})
+            with LOCK:
+                with open(os.path.join(rdir, "web", "chosen.js"), "w") as f:
+                    f.write("// the room's chosen design: the walkthrough and Plans open on it. Written by lib/serve.py\n"
+                            f"window.CHOSEN = {json.dumps(design)};\n")
+                card = os.path.join(rdir, "web", "cards", design + ".jpg")
+                home = os.path.join(ROOT, room.split(os.sep)[0], "index.html")   # houses/index.html
+                if os.path.isfile(card) and os.path.isfile(home):
+                    rel = os.path.relpath(rdir, os.path.dirname(home))
+                    with open(home) as f:
+                        page = f.read()
+                    m = re.search(r'<article class="room">(?:(?!</article>).)*?href="%s/web/index.html".*?</article>' % re.escape(rel), page, re.S)
+                    if m:
+                        new = re.sub(r'<img src="[^"]*"', f'<img src="{rel}/web/cards/{design}.jpg"', m.group(0), count=1)
+                        with open(home, "w") as f:
+                            f.write(page.replace(m.group(0), new))
+        except (KeyError, ValueError, AttributeError, OSError) as e:
+            return self.reply(400, {"error": str(e)})
+        print(f"chose {room}: {design}", flush=True)
+        self.reply(200, {"ok": True})
+
     def do_POST(self):
         if self.path == "/api/status":
             return self.status()
+        if self.path == "/api/choose":
+            return self.choose()
         if self.path != "/api/dimension":
             return self.reply(404, {"error": "unknown endpoint"})
         try:

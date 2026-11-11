@@ -62,7 +62,7 @@
 
   <section id="gallery" hidden>
     <div class="rhead">
-      <p class="rintro">The new design from every saved camera. Click a picture to see it larger.</p>
+      <p class="rintro">Every saved camera, for the design picked here. Click a picture to see it larger.</p>
       <div class="daynight" role="group" aria-label="Time of day">
         <button data-mode="day" aria-pressed="true">Day</button>
         <button data-mode="night" aria-pressed="false">Evening</button>
@@ -78,6 +78,7 @@
   "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
 } }
 </script>
+<script src="chosen.js"></script>   <!-- the chosen design, if one is: lib/serve.py writes it -->
 <script src="bundle.js"></script>   <!-- model + textures, so the page also opens straight from disk -->
 <script src="inventory.js"></script>   <!-- the room's products, from inventory.json -->
 <script src="../../../../../lib/web/lightbox.js"></script>

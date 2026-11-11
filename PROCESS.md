@@ -175,10 +175,26 @@ isn't offered twice for the same design.
   Other designs go to `web/variants/<id>/` (same command plus the design's flags) and appear in
   the walkthrough's design picker once listed in `variants` in `web/index.html` (and in `designs` in
   `inventory.json`). Then rebuild the Selections page so each product knows which designs it's in.
-- **Plans page** (`web/plans.html`): the top-down render (`--cams plan` into `renders/latest/`) with
+- **Each design's pictures sit next to its model**: `web/renders` for the room's own export (the first
+  pill) and `web/variants/<id>/renders` for the rest, each a symlink into `renders/` (`../renders/asis`
+  when the first pill is As it is; the chosen design's is `renders/latest`). The Before / after,
+  Renders and Plans tabs read them, with the same design pills as the walkthrough; a camera a design
+  has no render for is left out. Every design needs `plan.jpg` there (`--cams plan`) for the Plans tab.
+  Keep the exact flags behind each design's renders in the README's commands, so a re-render matches
+  the bake.
+- **Choosing a design** on the web: the walkthrough's "Make this the choice" button (`lib/serve.sh`
+  running) writes `web/chosen.js`; the walkthrough, Before / after, Renders and Plans then open on
+  it, and the home page's card for the room switches to `web/cards/<id>.jpg` (an 800 px copy of the
+  design's `photo1`, one per design). Record the choice in `selections.md` too.
+- **Plans page** (`web/plans.html`): the top-down render (`--cams plan`) with
   the cans and the dimension lines from `core.dim(...)` calls in `room.py`, each tagged measured /
   plan / photo / design / assumed. Add a `dim` for every measurement that comes in, and re-export.
-  It's also the check that the model matches what was measured.
+  It's also the check that the model matches what was measured. `window.PLANS = { designs }` in
+  the page lists the same designs as the walkthrough's `variants`. A room with its own plan
+  drawings (a track plan, say) links them as Room / Track pills above the plan.
+- **Tabs are the same in every room:** Walk through, Before / after, Renders, Plans, Selections, and,
+  only if the room needs more pages, one **Artifacts** tab (`web/artifacts.html`, listed in
+  `tabs.json`) that links them.
 - **Selections page:** put product pictures at the top of each section in `selections.md`
   (`![name](intake/products/x.jpg)`).
 - Check the walkthrough with a headless screenshot before saying it's done.
@@ -199,7 +215,11 @@ isn't offered twice for the same design.
 whole-house map before any are modeled: trace the outlines into `houses/<house>/house_layout.py`
 (`template/house/house_layout.py` shows the format), run `python3 lib/tools/house_map.py houses/<house>`, and open
 `houses/<house>/web/index.html`. Starting a room that's on the map: use its id as the folder
-name, then set `folder=` on its entry and rebuild the map. When two rooms that touch both exist, it
+name, then set `folder=` on its entry and rebuild the map. **Whenever a room is added, update the whole
+house too:** rebuild the map (it also updates the "N modeled" count on the home page), retake the
+home page's map picture with `lib/tools/house_snapshot.py houses/<house>` (server running), and add
+the room's card to `houses/index.html` with the same links as the others (Walk through, Renders,
+Plans, Selections). When two rooms that touch both exist, it
 also records where each room sits in house coordinates: an origin and a rotation, plus which
 doorway connects them. Until then, each room is modeled in its own coordinates, and anything
 seen through a doorway is a simple stand-in (as the bedroom was before it was built out for

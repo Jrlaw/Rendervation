@@ -27,8 +27,14 @@ body.doc main { display: block; }
 #doc img { max-width: 100%; border-radius: 6px; }
 
 /* Plans page: the top view with overlays, controls and lists beside it (below on phones) */
-.plans { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; max-width: 1240px; margin: 0 auto;
+body.doc main.plans { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; max-width: 1240px; margin: 0 auto;
   padding: 20px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)); }
+.subtabs { display: inline-flex; margin-bottom: 12px; }   /* Room / Track on the Plans pages */
+.plans > .subtabs, .plan-bar { grid-column: 1 / -1; }
+.plan-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }   /* Room / Track, then the designs */
+.plan-bar .subtabs { margin: 0; }
+.subtabs a, #doc .subtabs a { font: 500 0.875rem var(--font-body); color: var(--muted); text-decoration: none; padding: 6px 14px; border-radius: 999px; }
+.subtabs a[aria-current="page"], #doc .subtabs a[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / 0.12); }
 #plan svg { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 6px; background: var(--chip); }
 .dim-label { font: 600 4.2px var(--font-body); }
 .light-label { font: 700 4.4px var(--font-body); fill: #2b2200; }
@@ -37,7 +43,7 @@ body.doc main { display: block; }
 .plans ul { margin: 6px 0 0; padding-left: 1.1em; font-size: 0.88rem; display: grid; gap: 3px; }
 #legend { display: grid; gap: 4px; font-size: 0.85rem; margin-top: 6px; }
 #legend i { display: inline-block; width: 18px; height: 3px; margin-right: 8px; vertical-align: middle; border-radius: 2px; }
-@media (max-width: 860px) { .plans { grid-template-columns: 1fr; } }
+@media (max-width: 860px) { body.doc main.plans { grid-template-columns: 1fr; } }
 /* pictures at the top of a selection: a row of thumbnails, click to open full size */
 #doc p:has(> img) { display: flex; gap: 8px; flex-wrap: wrap; }
 #doc p > img { height: 150px; width: auto; max-width: 100%; object-fit: cover; border: 1px solid var(--line); background: var(--chip); }
