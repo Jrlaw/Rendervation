@@ -4,16 +4,19 @@ folder holds its files. sync() keeps the two in step, on start and whenever the 
 - a folder that isn't listed yet is added: its name and card text from the old hand-written home page
   (houses/index.html, read once per room), else from the house's house.md or the folder's name
 - a listed room or house whose folder is gone is flagged `missing` (never deleted: it may come back)
+- a house whose whole-house map is out of date gets a `house` job: the worker rebuilds the map
+  (lib/tools/house_map.py) and retakes its picture on the home page (lib/tools/house_snapshot.py)
 
 Rooms are folders houses/<house>/rooms/<room> (or examples/...) with a web/index.html.
 """
+import datetime
 import html
 import os
 import re
 
 from sqlalchemy import func, select
 
-from .db import House, RoomRow
+from .db import House, Job, RoomRow, queue
 from .rooms import chosen, designs, find_rooms, read_room
 
 TOPS = ("houses", "examples")
@@ -116,7 +119,45 @@ def sync(db, root):
             row.position = place if place is not None else (last + 1 if last is not None else 0)
     for row in db.scalars(select(RoomRow).where(RoomRow.room.not_in([r.rel for r in here_rooms]))):
         row.missing = True
+    for hid in here_houses:
+        if map_stale(root, hid) and not map_job_since(db, hid, map_sources(root, hid)):
+            queue(db, hid, "house")
     db.commit()
+
+
+def mtime(path):
+    try:
+        return os.stat(path).st_mtime
+    except OSError:
+        return 0
+
+
+def map_sources(root, hid):
+    """When the newest thing house_map.py reads last changed: house_layout.py, the rooms folder (a room
+    added or removed), and each room's layout.py, README.md (its status line) and web/ (its pages)."""
+    house = os.path.join(root, hid)
+    rooms = os.path.join(house, "rooms")
+    times = [mtime(os.path.join(house, "house_layout.py")), mtime(rooms)]
+    for name in os.listdir(rooms) if os.path.isdir(rooms) else []:
+        times += [mtime(os.path.join(rooms, name, f)) for f in ("layout.py", "README.md", "web")]
+    return max(times)
+
+
+def map_stale(root, hid):
+    """The house has a map (house_layout.py) and its data (web/house.js) or picture (web/map.jpg) is
+    missing or older than what they're made from."""
+    house = os.path.join(root, hid)
+    if not os.path.isfile(os.path.join(house, "house_layout.py")):
+        return False
+    data, pic = mtime(os.path.join(house, "web", "house.js")), mtime(os.path.join(house, "web", "map.jpg"))
+    return not data or data < map_sources(root, hid) or not pic or pic < data
+
+
+def map_job_since(db, hid, since):
+    """A house job made after the last change: waiting, running or finished (even failed: it's not
+    tried again until something changes)."""
+    last = db.scalars(select(Job).where(Job.room == hid, Job.kind == "house").order_by(Job.id.desc())).first()
+    return bool(last) and last.created.replace(tzinfo=datetime.timezone.utc).timestamp() >= since
 
 
 def card(room, chosen_id):

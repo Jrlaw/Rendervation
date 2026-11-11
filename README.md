@@ -43,6 +43,15 @@ lib/serve.sh
 ```
 
 The first start builds the server's container (a minute or two); after that it's up in seconds.
+Each house's whole-house map and its picture on the home page are rebuilt by themselves whenever a room
+is added or changed. The pictures need Playwright's Chromium once per computer:
+
+```sh
+python3 -m venv ~/.cache/home-render/pw-venv
+~/.cache/home-render/pw-venv/bin/pip install playwright pillow
+~/.cache/home-render/pw-venv/bin/playwright install chromium
+```
+
 Then open **http://127.0.0.1:8000** on this computer, or **http://&lt;computer name&gt;.local:8000**
 from a phone or laptop on the same home network (`hostname` prints the name). Ctrl+C stops it.
 
@@ -78,7 +87,8 @@ from a phone or laptop on the same home network (`hostname` prints the name). Ct
 ![The walkthrough's design controls: the pills, Make this the choice, and the Hidden list](docs/server-hidden.png)
 
 These are kept in a small database on your computer (`data/home-render.db`), with a log of every change.
-Back it up like any other file. You can also open a room's `web/index.html` straight from the folder;
+Back it up into your private houses repo with `python3 lib/tools/db_backup.py`, then commit and push
+`houses/` (Claude does this when asked). You can also open a room's `web/index.html` straight from the folder;
 it shows the room, but changing things needs the server.
 
 There's no sign-in, so keep the server on your home network, not the internet.

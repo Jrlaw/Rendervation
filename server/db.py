@@ -12,7 +12,7 @@ The schema changes through Alembic migrations (server/migrations), run on every 
 """
 import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, create_engine, event
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, create_engine, event, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
@@ -68,7 +68,8 @@ class Job(Base):
     __tablename__ = "jobs"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     room: Mapped[str] = mapped_column(String, index=True)
-    kind: Mapped[str] = mapped_column(String)                            # export (quick, unbaked) or bake (~8 min)
+    kind: Mapped[str] = mapped_column(String)                            # export (quick, unbaked), bake (~8 min), house
+    # (room is the house then: houses/<house>)
     status: Mapped[str] = mapped_column(String, default="queued")        # queued, running, done, failed
     created: Mapped[datetime.datetime] = mapped_column(DateTime, default=now)
     started: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
@@ -76,6 +77,17 @@ class Job(Base):
     seconds: Mapped[float | None] = mapped_column(Float, nullable=True)
     log: Mapped[str] = mapped_column(Text, default="")
     after: Mapped[int | None] = mapped_column(ForeignKey("jobs.id"), nullable=True)   # the export a bake follows
+
+
+def queue(db, room, kind, after=None):
+    """Queue a job, unless the same one is already waiting: one queued bake covers every edit before it."""
+    waiting = db.scalars(select(Job).where(Job.room == room, Job.kind == kind, Job.status == "queued")).first()
+    if waiting:
+        return waiting
+    job = Job(room=room, kind=kind, after=after)
+    db.add(job)
+    db.flush()
+    return job
 
 
 def connect(path):

@@ -21,7 +21,7 @@ files:
 | `rooms` | each room: house, name, card line, place, hidden, chosen design, `missing` |
 | `design_settings` | a design's hidden flag, new label or new place (only where changed) |
 | `changes` | every edit: when, who, which room, what (`GET /api/rooms/{room}/changes`) |
-| `jobs` | Blender work queued for the worker: `export` (seconds) and `bake` (~8 min) |
+| `jobs` | work queued for the worker: `export` (seconds), `bake` (~8 min), `house` (a house's map) |
 
 **Houses and rooms** are rows: the database is the list the home page draws, and each room's folder
 holds its files. `server/catalog.py` keeps them in step on start and whenever the list is asked for. A
@@ -57,7 +57,8 @@ server/
     jobs.py          the queue the worker takes jobs from
   tests/           pytest: unit (test_rooms) and integration (test_api, test_worker), on a test house
   Containerfile    python:3.13-slim; the `test` stage adds pytest
-lib/worker.py      the worker: standard library only, runs next to Blender
+lib/worker.py      the worker: standard library only, runs next to Blender (and Playwright, for map pictures)
+lib/tools/db_backup.py   the database into houses/backup/, for git
 lib/serve.sh       builds the image if needed, starts the worker and the container
 server/test.sh     the tests, in the container
 ```
@@ -81,6 +82,16 @@ The home page is the toolkit's `index.html`, drawn by `lib/web/home.js` from `GE
 `GET /api/rooms/{room}/designs` for the room's designs and chosen one; opened straight from disk they
 fall back to the page's own list.
 
+## The whole-house map, kept up to date
+
+A house with a map (`house_layout.py`) has its data (`web/house.js`) and its home-page picture
+(`web/map.jpg`) rebuilt by itself. Every 30 seconds (`HR_WATCH`), and whenever a page asks for the
+list, the server checks each house: when the data is missing or older than what it's made from
+(`house_layout.py`, the rooms folder, each room's `layout.py`, `README.md` and `web/`), or the picture
+is older than the data, it queues a `house` job. The worker runs `lib/tools/house_map.py`, then
+`lib/tools/house_snapshot.py` (the 3D dollhouse, without the floor switch, cropped to the house).
+A failed job isn't retried until the house changes again.
+
 ## The worker
 
 The container has no Blender or GPU, so a size typed into the walkthrough queues an `export` job, and
@@ -103,5 +114,11 @@ GitHub runs the same tests on every pull request (`.github/workflows/server-test
 
 ## Back up
 
-`data/home-render.db` is the only copy of the choices, room names and card lines, hidden rooms and designs, and the change log. Copy it while
-the server is stopped, or any time with `sqlite3 data/home-render.db ".backup data/backup.db"`.
+`data/home-render.db` is the only copy of the choices, room names and card lines, hidden rooms and
+designs, and the change log. Back it up into the private houses repo, then commit and push that:
+
+    python3 lib/tools/db_backup.py
+
+It writes `houses/backup/home-render.db` (an exact copy, safe while the server runs) and
+`houses/backup/home-render.json` (every table, readable, so the history shows what changed). To
+restore: stop the server, copy the backup to `data/home-render.db`, start it again.

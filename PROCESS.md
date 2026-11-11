@@ -221,9 +221,11 @@ whole-house map before any are modeled: trace the outlines into `houses/<house>/
 (`template/house/house_layout.py` shows the format), run `python3 lib/tools/house_map.py houses/<house>`, and open
 `houses/<house>/web/index.html`. Starting a room that's on the map: use its id as the folder
 name, then set `folder=` on its entry and rebuild the map. **Whenever a room is added, update the whole
-house too:** rebuild the map and retake the home page's map picture with
-`lib/tools/house_snapshot.py houses/<house>` (server running). The home page's cards, links and
-"N modeled" count come from the server. When two rooms that touch both exist, it
+house too:** put it in `house_layout.py` with `folder=` set. With the server running, the map's
+data and its home-page picture are rebuilt by themselves within half a minute of any change (a
+`house` job, docs/backend.md); a house without `house_layout.py` gets one, built from what its rooms
+already place around them. The home page's cards, links and "N modeled" count come from the server.
+After a session's changes, back up the database (`python3 lib/tools/db_backup.py`) and commit `houses/`. When two rooms that touch both exist, it
 also records where each room sits in house coordinates: an origin and a rotation, plus which
 doorway connects them. Until then, each room is modeled in its own coordinates, and anything
 seen through a doorway is a simple stand-in (as the bedroom was before it was built out for

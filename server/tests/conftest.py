@@ -85,7 +85,8 @@ def root(tmp_path):
 
 @pytest.fixture
 def app(root):
-    return create_app(Settings(root=str(root), db=str(root / "data/test.db"), tools=os.path.join(REPO, "lib/tools")))
+    return create_app(Settings(root=str(root), db=str(root / "data/test.db"), tools=os.path.join(REPO, "lib/tools"),
+                               watch=0))
 
 
 @pytest.fixture

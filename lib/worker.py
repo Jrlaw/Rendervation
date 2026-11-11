@@ -2,9 +2,12 @@
 lib/serve.sh starts it next to the server; by itself:
     python3 lib/worker.py [http://127.0.0.1:8000]
 
-Two lanes, so a size typed in the walkthrough isn't stuck behind an 8-minute bake:
+A lane per kind, so a size typed in the walkthrough isn't stuck behind an 8-minute bake:
   export  the room's walkthrough model, unbaked (a few seconds), straight into web/
   bake    the lighting baked again (~8 min) into web/.bake, then swapped into web/
+  house   a house's whole-house map rebuilt (lib/tools/house_map.py) and its home-page picture
+          retaken (lib/tools/house_snapshot.py, with Playwright's Chromium: $HR_PLAYWRIGHT_PY),
+          queued by the server whenever a room is added or changed
 Standard library only.
 """
 import json
@@ -18,6 +21,9 @@ import urllib.error
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TOOLS = os.path.join(ROOT, "lib", "tools")
+SNAP_PY = os.environ.get("HR_PLAYWRIGHT_PY", os.path.expanduser("~/.cache/home-render/pw-venv/bin/python"))
+URL = "http://127.0.0.1:8000"   # the server, for the snapshot to open (set from the command line)
 SWAP = ("model.glb", "scene.json", "scene.js", "bundle.js", os.path.join("textures", "bake.jpg"))
 FILES = threading.Lock()     # an export and a bake's swap don't write web/ at the same time
 
@@ -58,7 +64,18 @@ def bake(rdir):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
-RUN = {"export": export, "bake": bake}
+def house(hdir, tools=TOOLS, snap_py=None):
+    a = subprocess.run([sys.executable, os.path.join(tools, "house_map.py"), hdir], cwd=ROOT,
+                       capture_output=True, text=True, timeout=120)
+    log = a.stdout + a.stderr
+    if a.returncode:
+        return False, log[-4000:]
+    b = subprocess.run([snap_py or SNAP_PY, os.path.join(tools, "house_snapshot.py"), hdir, URL], cwd=ROOT,
+                       capture_output=True, text=True, timeout=180)
+    return b.returncode == 0, (log + b.stdout + b.stderr)[-4000:]
+
+
+RUN = {"export": export, "bake": bake, "house": house}
 
 
 def lane(api, kind, root, idle=2.0):
@@ -80,7 +97,8 @@ def lane(api, kind, root, idle=2.0):
 
 
 if __name__ == "__main__":
-    api = Api(sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000", os.path.join(ROOT, "data"))
+    URL = sys.argv[1] if len(sys.argv) > 1 else URL
+    api = Api(URL, os.path.join(ROOT, "data"))
     for kind in RUN:
         threading.Thread(target=lane, args=(api, kind, ROOT), daemon=True).start()
     print("worker: waiting for export and bake jobs", flush=True)
