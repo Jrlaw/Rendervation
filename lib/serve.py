@@ -9,6 +9,14 @@ to correct a size:
 It records the value in that room's dimensions.json (lib/roomkit/dimensions.py), then
 re-exports the room's walkthrough model (quick, unbaked: a few seconds) and answers when done;
 then it bakes the lighting again in the background (~8 min) and swaps that in (reload to see it).
+
+And one the Selections checklist uses to tick a product off:
+
+  POST /api/status  {"room": "houses/<house>/rooms/<room>", "group": 0, "item": 3,
+                     "name": "Kato 2-861 ...", "status": "need" | "ordered" | "have"}
+
+It sets that product's status in the room's inventory.json (the name must match, so a stale page
+can't change the wrong one) and rebuilds the Selections page and web/inventory.js.
 """
 import datetime
 import http.server
@@ -71,14 +79,47 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def room_dir(self, req):
+        room = os.path.normpath(req["room"])
+        rdir = os.path.join(ROOT, room)
+        ok = room.split(os.sep)[0] in ("houses", "examples") and os.path.isfile(os.path.join(rdir, "render.sh"))
+        return room, rdir, ok
+
+    def status(self):
+        try:
+            req = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+            room, rdir, ok = self.room_dir(req)
+            path = os.path.join(rdir, "inventory.json")
+            if not ok or not os.path.isfile(path):
+                return self.reply(400, {"error": "not a room with an inventory"})
+            if req["status"] not in ("need", "ordered", "have"):
+                return self.reply(400, {"error": "status is need, ordered or have"})
+            with LOCK:
+                with open(path) as f:
+                    inv = json.load(f)
+                it = inv["groups"][int(req["group"])]["items"][int(req["item"])]
+                if it["name"] != req["name"]:
+                    return self.reply(409, {"error": "the list changed: reload the page"})
+                it["status"] = req["status"]
+                with open(path, "w") as f:
+                    json.dump(inv, f, indent=1, ensure_ascii=False)
+                    f.write("\n")
+                run = subprocess.run([sys.executable, os.path.join(ROOT, "lib", "tools", "selections_page.py"), rdir],
+                                     capture_output=True, text=True, timeout=60)
+        except (KeyError, ValueError, IndexError, TypeError, OSError) as e:
+            return self.reply(400, {"error": str(e)})
+        print(f"status {room}: {req['name']} -> {req['status']}", flush=True)
+        self.reply(200 if run.returncode == 0 else 500, {"ok": run.returncode == 0, "log": run.stderr[-2000:]})
+
     def do_POST(self):
+        if self.path == "/api/status":
+            return self.status()
         if self.path != "/api/dimension":
             return self.reply(404, {"error": "unknown endpoint"})
         try:
             req = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
-            room = os.path.normpath(req["room"])
-            rdir = os.path.join(ROOT, room)
-            if not room.startswith("houses" + os.sep) or not os.path.isfile(os.path.join(rdir, "render.sh")):
+            room, rdir, ok = self.room_dir(req)
+            if not ok:
                 return self.reply(400, {"error": "not a room"})
             path = os.path.join(rdir, dimensions.FILE)
             with open(path) as f:

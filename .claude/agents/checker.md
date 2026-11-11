@@ -69,7 +69,8 @@ scope in the README):
 
 **Model vs. `selections.md`:** everything marked chosen or existing is in `room.py` for the
 current design, at the size its specs give; nothing in `room.py` is missing from
-`selections.md` (a placeholder needs a line there). Note gaps either way.
+`selections.md` (a placeholder needs a line there). Note gaps either way. If the room has an
+`inventory.json`, each product's `where` names objects that exist in that design's model.
 
 ## How to answer
 

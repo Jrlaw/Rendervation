@@ -1,0 +1,27 @@
+{
+ "about": "The room's products: what's here and what's still needed (see PROCESS.md, Ideas and selections). Regenerate: python3 lib/tools/selections_page.py houses/<house>/rooms/<room>",
+ "designs": [
+  [
+   "new",
+   "New design"
+  ],
+  [
+   "asis",
+   "As it is"
+  ]
+ ],
+ "groups": [
+  {
+   "name": "Products",
+   "items": [
+    {
+     "name": "Nothing picked yet",
+     "qty": 1,
+     "status": "need",
+     "swatch": "#e9e3d8",
+     "spec": "add products here as they're picked"
+    }
+   ]
+  }
+ ]
+}

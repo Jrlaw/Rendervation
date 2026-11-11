@@ -112,8 +112,13 @@ Whenever a product link, screenshot or idea comes in, or Claude suggests one:
 4. **When something is picked**, update its status in `selections.md`, make it the default in
    `room.py` with a `# chosen: … (date)` comment, and note what was passed on and why.
 
-After any change to `selections.md`, rebuild its web page:
-`python3 lib/tools/selections_page.py houses/<house>/rooms/<room>` (writes `web/selections.html`).
+**Products go in `inventory.json`** too, once picked: name, qty, price, link, a spec line, a picture
+(`image` from `intake/products/`, or a CSS `swatch`), status (`have`, `ordered`, `need`), and `where`: the
+model's object names (or name prefixes) it is. That one file drives the Selections checklist (filtered by
+design and status, with Show in 3D) and the walkthrough's sidebar, which lists what's in the design on show
+and outlines a product when you pick it. `selections.md` stays as the design notes, folded under the checklist.
+After any change to either, rebuild:
+`python3 lib/tools/selections_page.py houses/<house>/rooms/<room>` (writes `web/selections.html` and `web/inventory.js`).
 
 Never drop an option silently, but keep `selections.md` to what's current: passed-on options and
 the running log go in `selections-history.md` beside it. With several design options, give each its own
@@ -168,8 +173,8 @@ isn't offered twice for the same design.
 - `./render.sh --design asis --export web` re-exports the walkthrough's as-is model (seconds, live lighting);
   add `--bake` (~8 min, GPU) to bake the Cycles lighting into it so it looks like the renders.
   Other designs go to `web/variants/<id>/` (same command plus the design's flags) and appear in
-  the walkthrough's design picker once listed in `variants` in `web/index.html`. Then update the Selections
-  panel in `web/index.html` from `selections.md`.
+  the walkthrough's design picker once listed in `variants` in `web/index.html` (and in `designs` in
+  `inventory.json`). Then rebuild the Selections page so each product knows which designs it's in.
 - **Plans page** (`web/plans.html`): the top-down render (`--cams plan` into `renders/latest/`) with
   the cans and the dimension lines from `core.dim(...)` calls in `room.py`, each tagged measured /
   plan / photo / design / assumed. Add a `dim` for every measurement that comes in, and re-export.
