@@ -40,7 +40,7 @@ room_name = title(os.path.join(room, "README.md"), os.path.basename(room))
 house_name = title(os.path.join(house, "house.md"), os.path.basename(house))
 md = open(os.path.join(room, "selections.md")).read()
 up = "../../../../../"     # web/ -> repo root
-# a room's own extra pages, as more tabs: tabs.json, [["train.html", "Train"], ...]
+# a room's own extra pages, as more tabs: tabs.json, [["artifacts.html", "Artifacts"], ...]; one Artifacts tab is the convention
 extra = ""
 if os.path.exists(os.path.join(room, "tabs.json")):
     extra = "".join(f'\n    <a href="{html.escape(h)}">{html.escape(label)}</a>' for h, label in json.load(open(os.path.join(room, "tabs.json"))))
@@ -194,6 +194,8 @@ page = f"""<!doctype html>
   </nav>
   <div class="tabs">
     <a href="index.html">Walk through</a>
+    <a href="index.html#renders">Before / after</a>
+    <a href="index.html#gallery">Renders</a>
     <a href="plans.html">Plans</a>
     <a href="selections.html" aria-current="page">Selections</a>{extra}
   </div>

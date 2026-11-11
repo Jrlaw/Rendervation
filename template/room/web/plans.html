@@ -17,6 +17,8 @@
   </nav>
   <div class="tabs">
     <a href="index.html">Walk through</a>
+    <a href="index.html#renders">Before / after</a>
+    <a href="index.html#gallery">Renders</a>
     <a href="plans.html" aria-current="page">Plans</a>
     <a href="selections.html">Selections</a>
   </div>
@@ -41,6 +43,9 @@
     <p class="dims" style="margin:0">Top view, north up. Drawn from layout.py on every export, so it updates as measurements come in.</p>
   </aside>
 </main>
+<!-- with more than one design, list them like the walkthrough's variants (each needs renders/plan.jpg):
+<script>window.PLANS = { designs: [["asis", "As it is"], ["new", "New design"]] };</script> -->
+<script src="chosen.js"></script>   <!-- the chosen design, if one is: lib/serve.py writes it -->
 <script src="scene.js"></script>   <!-- written by render.sh --export web -->
 <script src="../../../../../lib/web/plans.js"></script>
 </body>

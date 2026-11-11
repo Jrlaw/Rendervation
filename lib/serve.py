@@ -17,16 +17,29 @@ And one the Selections checklist uses to tick a product off:
 
 It sets that product's status in the room's inventory.json (the name must match, so a stale page
 can't change the wrong one) and rebuilds the Selections page and web/inventory.js.
+
+And one the walkthrough's "Make this the choice" button uses:
+
+  POST /api/choose  {"room": "houses/<house>/rooms/<room>", "design": "layout_i"}
+
+It writes the room's web/chosen.js (the walkthrough and Plans open on that design) and makes
+web/cards/<design>.jpg the room's picture on the house's home page, first making that card from the
+design's render, or from the walkthrough's snapshot of the 3D view, when it has none (needs Pillow).
 """
+import base64
 import datetime
 import http.server
+import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
 import threading
 import time
+
+from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "lib"))
@@ -63,6 +76,23 @@ def bake_later(rdir):
     st["thread"].start()
 
 
+def make_card(card, rdir, design, first, camera, snapshot):
+    """A design's home-page card, 800px wide: its day render from the room's first camera when it has
+    one (web/renders, or web/variants/<id>/renders), else the walkthrough's snapshot of the 3D view."""
+    base = os.path.join(rdir, "web") if first else os.path.join(rdir, "web", "variants", design)
+    render = os.path.join(base, "renders", "day", f"{camera}.jpg")
+    if camera and re.fullmatch(r"[\w-]+", camera) and os.path.isfile(render):
+        src = render
+    elif snapshot and snapshot.startswith("data:image/jpeg;base64,"):
+        src = io.BytesIO(base64.b64decode(snapshot.split(",", 1)[1]))
+    else:
+        return
+    img = Image.open(src).convert("RGB")
+    img.thumbnail((800, 800))
+    os.makedirs(os.path.dirname(card), exist_ok=True)
+    img.save(card, quality=85)
+
+
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *a, **k):
         super().__init__(*a, directory=ROOT, **k)
@@ -70,6 +100,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):        # walkthrough files change on every export
         self.send_header("Cache-Control", "no-cache")
         super().end_headers()
+
+    def send_head(self):
+        # Always send the file. A renders symlink re-pointed at an older folder serves an older file
+        # at the same URL, so "not modified since" would keep the browser on the old picture.
+        if "If-Modified-Since" in self.headers:
+            del self.headers["If-Modified-Since"]
+        return super().send_head()
 
     def reply(self, code, data):
         body = json.dumps(data).encode()
@@ -111,9 +148,42 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         print(f"status {room}: {req['name']} -> {req['status']}", flush=True)
         self.reply(200 if run.returncode == 0 else 500, {"ok": run.returncode == 0, "log": run.stderr[-2000:]})
 
+    def choose(self):
+        try:
+            req = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+            room, rdir, ok = self.room_dir(req)
+            design = str(req["design"])
+            with open(os.path.join(rdir, "web", "index.html")) as f:
+                ids = re.findall(r'\["([\w-]+)", "[^"]*"\]', re.search(r"variants: (\[.*?\]\]),", f.read(), re.S).group(1))
+            if not ok or design not in ids:
+                return self.reply(400, {"error": "not one of this room's designs"})
+            with LOCK:
+                with open(os.path.join(rdir, "web", "chosen.js"), "w") as f:
+                    f.write("// the room's chosen design: the walkthrough and Plans open on it. Written by lib/serve.py\n"
+                            f"window.CHOSEN = {json.dumps(design)};\n")
+                card = os.path.join(rdir, "web", "cards", design + ".jpg")
+                if not os.path.isfile(card):
+                    make_card(card, rdir, design, design == ids[0], req.get("camera"), req.get("snapshot"))
+                home = os.path.join(ROOT, room.split(os.sep)[0], "index.html")   # houses/index.html
+                if os.path.isfile(card) and os.path.isfile(home):
+                    rel = os.path.relpath(rdir, os.path.dirname(home))
+                    with open(home) as f:
+                        page = f.read()
+                    m = re.search(r'<article class="room">(?:(?!</article>).)*?href="%s/web/index.html".*?</article>' % re.escape(rel), page, re.S)
+                    if m:
+                        new = re.sub(r'<img src="[^"]*"', f'<img src="{rel}/web/cards/{design}.jpg"', m.group(0), count=1)
+                        with open(home, "w") as f:
+                            f.write(page.replace(m.group(0), new))
+        except (KeyError, ValueError, AttributeError, OSError) as e:
+            return self.reply(400, {"error": str(e)})
+        print(f"chose {room}: {design}", flush=True)
+        self.reply(200, {"ok": True})
+
     def do_POST(self):
         if self.path == "/api/status":
             return self.status()
+        if self.path == "/api/choose":
+            return self.choose()
         if self.path != "/api/dimension":
             return self.reply(404, {"error": "unknown endpoint"})
         try:

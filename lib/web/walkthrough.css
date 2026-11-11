@@ -114,6 +114,7 @@ aside h2 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; 
 #renders { flex: 1; overflow-y: auto; padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .rgrid { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 22px; }
 figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
+figure[hidden] { display: none; }   /* a render this design doesn't have */
 figcaption { display: flex; justify-content: space-between; gap: 10px; font-size: 0.85rem; color: var(--muted); }
 figcaption b { color: var(--ink); font-weight: 600; }
 .compare { position: relative; aspect-ratio: 4 / 3; max-width: 100%; border-radius: 6px; overflow: hidden; background: var(--chip); user-select: none; touch-action: pan-y; cursor: ew-resize; }
@@ -126,6 +127,7 @@ figcaption b { color: var(--ink); font-weight: 600; }
 .plan { max-width: 620px; }
 .rhead { max-width: 1240px; margin: 0 auto 16px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
 .rhead .rintro { margin: 0; }
+.rhead .rdesign { margin-left: auto; }   /* design pills, then Day / Evening, on the right */
 .daynight { display: flex; gap: 4px; background: var(--chip); padding: 3px; border-radius: 999px; }
 .daynight button { font: 500 0.875rem var(--font-body); color: var(--muted); background: none; border: 0; padding: 6px 14px; border-radius: 999px; cursor: pointer; }
 .daynight button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / 0.12); }
@@ -140,6 +142,9 @@ figure > img { width: 100%; max-width: 100%; aspect-ratio: 4 / 3; object-fit: co
   #stage { flex: none; height: 58%; }
   aside { width: auto; border-left: 0; border-top: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .brand small { display: none; }
+  /* six tabs don't fit a phone: keep each label on one line and let the bar scroll sideways */
+  .tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .tabs a, .tabs button { white-space: nowrap; flex: none; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 
@@ -173,6 +178,7 @@ main > section[hidden] { display: none !important; }      /* #walk's display: fl
 .lightbox figure > img { width: auto; height: auto; aspect-ratio: auto; background: none; }
 /* dimensions: toggle, labels on the 3D lines, and the correction form */
 .stage-dims { order: 3; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
+.stage-choose { order: 2; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }   /* under the design pills */
 .dimlabels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .dimlabel { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; white-space: nowrap;
   font: 600 0.78rem var(--font-body); color: #fff; background: rgb(24 21 18 / 0.85); border: 0;

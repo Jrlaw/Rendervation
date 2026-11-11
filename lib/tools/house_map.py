@@ -38,8 +38,10 @@ def room_status(folder):
 def links(folder):
     web = os.path.join(house, "rooms", folder, "web")
     out = []
-    for page, label in (("index.html", "Walkthrough"), ("plans.html", "Plans"), ("selections.html", "Selections")):
-        if os.path.exists(os.path.join(web, page)):
+    # the room's main sections, in the tab bar's order (Before / after stays a tab, off the cards)
+    for page, label in (("index.html", "Walk through"), ("index.html#gallery", "Renders"),
+                        ("plans.html", "Plans"), ("selections.html", "Selections")):
+        if os.path.exists(os.path.join(web, page.split("#")[0])):
             out.append([label, f"../rooms/{folder}/web/{page}"])
     return out
 
@@ -83,3 +85,15 @@ with open(out, "w") as f:
     f.write("window.HOUSE = " + json.dumps(data, indent=1) + ";\n")
 print(f"wrote {os.path.relpath(out)}: {len(rooms)} rooms, "
       f"{sum(1 for r in rooms if r['folder'])} modeled")
+
+# the house's card on the home page says how many are modeled; its picture is lib/tools/house_snapshot.py
+home = os.path.join(os.path.dirname(house), "index.html")   # houses/index.html
+if os.path.exists(home):
+    with open(home) as f:
+        page = f.read()
+    card = re.search(r'<article class="room">\s*<img src="%s/web/map.jpg".*?</article>' % re.escape(os.path.basename(house)), page, re.S)
+    if card:
+        n = sum(1 for r in rooms if r["folder"])
+        new = re.sub(r"\d+ modeled", f"{n} modeled", card.group(0))
+        with open(home, "w") as f:
+            f.write(page.replace(card.group(0), new))
