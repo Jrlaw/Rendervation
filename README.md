@@ -43,10 +43,20 @@ lib/serve.sh
 ```
 
 The first start builds the server's container (a minute or two); after that it's up in seconds.
+Each house's whole-house map and its picture on the home page are rebuilt by themselves whenever a room
+is added or changed. The pictures need Playwright's Chromium once per computer:
+
+```sh
+python3 -m venv ~/.cache/home-render/pw-venv
+~/.cache/home-render/pw-venv/bin/pip install playwright pillow
+~/.cache/home-render/pw-venv/bin/playwright install chromium
+```
+
 Then open **http://127.0.0.1:8000** on this computer, or **http://&lt;computer name&gt;.local:8000**
 from a phone or laptop on the same home network (`hostname` prints the name). Ctrl+C stops it.
 
-- **Home:** every house and room, each with its latest render.
+- **Home:** every house and room, each card showing the room's chosen design, with links to its
+  walkthrough, renders, plans and selections. New rooms appear by themselves.
 - **Walkthrough:** walk around the room in 3D. Switch day and evening, flip between designs,
   look at the before photos, and fix a measurement (Claude re-exports the room for you). The
   Settings button adjusts resolution, antialiasing, brightness and field of view for your machine.
@@ -62,6 +72,10 @@ from a phone or laptop on the same home network (`hostname` prints the name). Ct
 
 *Hiding a design and bringing it back ([video](docs/server-hide.mp4)).*
 
+![The home page in Edit mode: names and card lines editable, arrows and Hide on each room](docs/home-edit.png)
+
+- **Edit (home page):** rename a house or room, change the line on its card, move rooms with the
+  arrows, and hide one. Hidden rooms are listed under their house to bring back; nothing is deleted.
 - **Make this the choice:** under the design pills in the walkthrough. Every tab then opens on that
   design, and the home page shows its picture.
 - **Hide:** next to it. The design leaves the walkthrough, Before / after, Renders and Plans; its files
@@ -73,7 +87,9 @@ from a phone or laptop on the same home network (`hostname` prints the name). Ct
 ![The walkthrough's design controls: the pills, Make this the choice, and the Hidden list](docs/server-hidden.png)
 
 These are kept in a small database on your computer (`data/home-render.db`), with a log of every change.
-Back it up like any other file. You can also open a room's `web/index.html` straight from the folder;
+Once a day, after edits, the worker backs it up into `houses/backup/home-render.json` (or by hand: `python3 lib/tools/db_backup.py`), so keeping a copy of
+`houses/` (another disk, the NAS, cloud storage) keeps your choices too; `python3 lib/tools/db_backup.py --restore`
+brings them back. If `houses/` is a git repo with a remote, the backup is also committed and pushed. You can also open a room's `web/index.html` straight from the folder;
 it shows the room, but changing things needs the server.
 
 There's no sign-in, so keep the server on your home network, not the internet.

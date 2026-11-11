@@ -85,15 +85,4 @@ with open(out, "w") as f:
     f.write("window.HOUSE = " + json.dumps(data, indent=1) + ";\n")
 print(f"wrote {os.path.relpath(out)}: {len(rooms)} rooms, "
       f"{sum(1 for r in rooms if r['folder'])} modeled")
-
-# the house's card on the home page says how many are modeled; its picture is lib/tools/house_snapshot.py
-home = os.path.join(os.path.dirname(house), "index.html")   # houses/index.html
-if os.path.exists(home):
-    with open(home) as f:
-        page = f.read()
-    card = re.search(r'<article class="room">\s*<img src="%s/web/map.jpg".*?</article>' % re.escape(os.path.basename(house)), page, re.S)
-    if card:
-        n = sum(1 for r in rooms if r["folder"])
-        new = re.sub(r"\d+ modeled", f"{n} modeled", card.group(0))
-        with open(home, "w") as f:
-            f.write(page.replace(card.group(0), new))
+# the home page counts the modeled rooms itself (server/catalog.py); its map picture is lib/tools/house_snapshot.py

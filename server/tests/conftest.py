@@ -2,7 +2,9 @@
 
   houses/test/rooms/den   three designs (asis first, mcm, open), photo1 renders for asis and mcm,
                           a render.sh that "exports", dimensions, an inventory, an old web/chosen.js
-  houses/test/rooms/attic one design (no variants)
+  houses/test/rooms/attic one design (no variants), not on the old home page
+  houses/test             house.md, a whole-house map, and the old hand-written houses/index.html
+  examples/demo/rooms/bath an example room still at intake: a before photo, never exported
 """
 import json
 import os
@@ -24,6 +26,19 @@ Walkthrough.start({
 </script>"""
 
 
+# the hand-written home page from before the database: names and card lines are taken from it once
+OLD_HOME = """<main>
+  <!-- one <h2> per house, one .room card per room -->
+  <h2>Test house</h2>
+  <div class="rooms">
+    <article class="room"><img src="test/web/map.jpg" alt="map"><div><b>Whole house</b>
+      <small>Both floors &amp; the yard · 1 modeled, the rest placeholders</small><nav><a href="test/web/index.html">Map</a></nav></div></article>
+    <article class="room"><img src="test/rooms/den/web/cards/mcm.jpg" alt="den"><div><b>The den</b>
+      <small>Design settled ·
+        renders next</small><nav><a href="test/rooms/den/web/index.html">Walk through</a></nav></div></article>
+  </div></main>"""
+
+
 def jpg(path, size=(1600, 1200), color=(120, 90, 60)):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     Image.new("RGB", size, color).save(path)
@@ -42,6 +57,8 @@ def root(tmp_path):
     write(den / "web/chosen.js", 'window.CHOSEN = "mcm";\n')
     jpg(den / "web/renders/day/photo1.jpg")
     jpg(den / "web/variants/mcm/renders/day/photo1.jpg", color=(20, 120, 60))
+    write(den / "web/scene.json", "{}")
+    write(tmp_path / "houses/test/rooms/attic/web/scene.json", "{}")
     write(den / "render.sh", "#!/bin/sh\necho EXPORTED\n")
     os.chmod(den / "render.sh", 0o755)
     write(den / "dimensions.json", json.dumps({"units": "inches", "dimensions": {
@@ -51,7 +68,12 @@ def root(tmp_path):
         {"name": "Lights", "items": [{"name": "Lamp", "qty": 1, "status": "need"}]}]}))
     write(tmp_path / "houses/test/rooms/attic/web/index.html",
           '<script>Walkthrough.start({ views: [["photo1", "Up the stairs"]] });</script>')
-    write(tmp_path / "houses/index.html", "<h1>Houses</h1>")
+    write(tmp_path / "houses/index.html", OLD_HOME)
+    write(tmp_path / "houses/test/house.md", "# The test house\n\nTwo rooms.\n")
+    write(tmp_path / "houses/test/web/index.html", "<h1>Map</h1>")
+    jpg(tmp_path / "houses/test/web/map.jpg")
+    write(tmp_path / "examples/demo/rooms/bath/web/index.html", '<script>Walkthrough.start({ views: [["photo1", "In"]] });</script>')
+    jpg(tmp_path / "examples/demo/rooms/bath/web/before/photo1.jpg")
     write(tmp_path / "index.html", "<h1>Home</h1>")
     write(tmp_path / "lib/web/walkthrough.js", "// viewer")
     write(tmp_path / "lib/serve.sh", "#!/bin/sh")
@@ -63,7 +85,8 @@ def root(tmp_path):
 
 @pytest.fixture
 def app(root):
-    return create_app(Settings(root=str(root), db=str(root / "data/test.db"), tools=os.path.join(REPO, "lib/tools")))
+    return create_app(Settings(root=str(root), db=str(root / "data/test.db"), tools=os.path.join(REPO, "lib/tools"),
+                               watch=0, backup=False))
 
 
 @pytest.fixture

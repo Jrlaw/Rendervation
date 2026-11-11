@@ -42,8 +42,12 @@ window.HOUSE = {
    "status": "design chosen, walkthrough built",
    "links": [
     [
-     "Walkthrough",
+     "Walk through",
      "../rooms/hall-bath/web/index.html"
+    ],
+    [
+     "Renders",
+     "../rooms/hall-bath/web/index.html#gallery"
     ],
     [
      "Plans",

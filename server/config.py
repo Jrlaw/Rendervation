@@ -4,6 +4,8 @@ and in the tests:
   HR_ROOT  the content: houses/, examples/, lib/web/ (default: this repo)
   HR_DB    the SQLite file (default: $HR_ROOT/data/home-render.db)
   HR_TOOLS lib/tools, for the page builders the server runs (default: this repo's)
+  HR_WATCH seconds between checks of the folders for added or changed rooms (default 30; 0: off)
+  HR_BACKUP 1: a daily backup of the database into houses/backup/, when something was edited (default); 0: off
 """
 import os
 from dataclasses import dataclass
@@ -16,6 +18,8 @@ class Settings:
     root: str
     db: str
     tools: str
+    watch: float = 30
+    backup: bool = True
 
     @property
     def data(self):   # the database's folder; the worker's token lives there too
@@ -26,4 +30,6 @@ def from_env():
     root = os.path.abspath(os.environ.get("HR_ROOT", REPO))
     return Settings(root=root,
                     db=os.path.abspath(os.environ.get("HR_DB", os.path.join(root, "data", "home-render.db"))),
-                    tools=os.path.abspath(os.environ.get("HR_TOOLS", os.path.join(REPO, "lib", "tools"))))
+                    tools=os.path.abspath(os.environ.get("HR_TOOLS", os.path.join(REPO, "lib", "tools"))),
+                    watch=float(os.environ.get("HR_WATCH", 30)),
+                    backup=os.environ.get("HR_BACKUP", "1") != "0")

@@ -13,7 +13,8 @@ python3 lib/worker.py "http://127.0.0.1:$port" &
 worker=$!
 trap 'kill $worker 2>/dev/null' EXIT INT TERM
 echo "Open http://$(hostname).local:$port (Ctrl+C to stop)"
-# label=disable: read the repo without relabeling it for SELinux. --reload picks up edits to server/
-podman run --rm --name rendervation -p "$port:8000" --security-opt label=disable \
+# label=disable: read the repo without relabeling it for SELinux. --reload picks up edits to server/;
+# --replace: a container left from the last run (still stopping) is replaced, not a startup error
+podman run --rm --replace --name rendervation -p "$port:8000" --security-opt label=disable \
   -v "$PWD:/srv" "$tag" \
   uvicorn server.app:app --host 0.0.0.0 --port 8000 --reload --reload-dir /srv/server

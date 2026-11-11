@@ -1,6 +1,5 @@
 """A room's designs on the web: list them, choose one, hide or show, rename, reorder.
 
-  GET   /api/rooms                              every room: its chosen design and home-page card
   GET   /api/rooms/{room}/designs               {designs: [{id, label, hidden, first}], chosen}
   PUT   /api/rooms/{room}/choice                {design, camera?, snapshot?}
   PATCH /api/rooms/{room}/designs/{design}      {label?, hidden?, position?}
@@ -19,8 +18,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from ..db import Change, DesignSetting, RoomRow
-from ..deps import current_user, get_db, get_settings
-from ..rooms import card_url, chosen, designs, find_rooms, load_room
+from ..deps import current_user, get_db
+from ..rooms import card_url, chosen, designs, load_room
 
 router = APIRouter(tags=["designs"])
 
@@ -61,15 +60,6 @@ def one(db, room, design):
     if not d:
         raise HTTPException(404, "not one of this room's designs")
     return d
-
-
-@router.get("/api/rooms")
-def list_rooms(settings=Depends(get_settings), db=Depends(get_db)):
-    out = []
-    for r in find_rooms(settings.root):
-        c = chosen(db, r)
-        out.append({"room": r.rel, "chosen": c, "card": card_url(r, c)})
-    return out
 
 
 @router.get("/api/rooms/{room:path}/designs")

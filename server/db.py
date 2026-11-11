@@ -1,14 +1,18 @@
 """The database: SQLite through SQLAlchemy. It holds what's changed on the web; what a room *has*
 (its designs, cameras, models, renders) stays in its files, and these tables record edits on top.
 
+  houses           each house: name, card text, place on the home page
+  rooms            each room: house, name, card text, place, hidden, chosen design; `missing` when its
+                   folder is gone (never deleted: the folder may come back)
   design_settings  a design's label, place and hidden flag, where changed from the room's own list
-  rooms            each room's chosen design
   changes          every edit: when, who, which room, what
-  jobs             Blender work for the worker on this computer (lib/worker.py)
+  jobs             work for the worker on this computer (lib/worker.py): Blender, house maps, backups
+
+The schema changes through Alembic migrations (server/migrations), run on every start.
 """
 import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, create_engine, event
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, create_engine, event, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
@@ -20,10 +24,25 @@ class Base(DeclarativeBase):
     pass
 
 
+class House(Base):
+    __tablename__ = "houses"
+    house: Mapped[str] = mapped_column(String, primary_key=True)         # houses/<house> or examples/<house>
+    name: Mapped[str] = mapped_column(String)
+    blurb: Mapped[str | None] = mapped_column(String, nullable=True)     # the whole-house card's line
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    missing: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
 class RoomRow(Base):
     __tablename__ = "rooms"
     room: Mapped[str] = mapped_column(String, primary_key=True)          # houses/<house>/rooms/<room>
     chosen: Mapped[str | None] = mapped_column(String, nullable=True)
+    house: Mapped[str | None] = mapped_column(String, nullable=True)
+    name: Mapped[str | None] = mapped_column(String, nullable=True)
+    blurb: Mapped[str | None] = mapped_column(String, nullable=True)     # the card's line under the name
+    position: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    hidden: Mapped[bool] = mapped_column(Boolean, default=False)
+    missing: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class DesignSetting(Base):
@@ -49,7 +68,8 @@ class Job(Base):
     __tablename__ = "jobs"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     room: Mapped[str] = mapped_column(String, index=True)
-    kind: Mapped[str] = mapped_column(String)                            # export (quick, unbaked) or bake (~8 min)
+    kind: Mapped[str] = mapped_column(String)                            # export (quick, unbaked), bake (~8 min), house
+    # (room is the house then: houses/<house>)
     status: Mapped[str] = mapped_column(String, default="queued")        # queued, running, done, failed
     created: Mapped[datetime.datetime] = mapped_column(DateTime, default=now)
     started: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
@@ -59,8 +79,37 @@ class Job(Base):
     after: Mapped[int | None] = mapped_column(ForeignKey("jobs.id"), nullable=True)   # the export a bake follows
 
 
+def queue(db, room, kind, after=None):
+    """Queue a job, unless the same one is already waiting: one queued bake covers every edit before it."""
+    waiting = db.scalars(select(Job).where(Job.room == room, Job.kind == kind, Job.status == "queued")).first()
+    if waiting:
+        return waiting
+    job = Job(room=room, kind=kind, after=after)
+    db.add(job)
+    db.flush()
+    return job
+
+
+BACKUP_EVERY = datetime.timedelta(days=1)
+
+
+def backup_due(db, at=None):
+    """Queue a `backup` job (lib/worker.py: the database into houses/backup/) once a day at most, and
+    only when something was edited since the last one. Checked with each sync (app.watch)."""
+    at = at or now()
+    last = db.scalars(select(Job).where(Job.kind == "backup").order_by(Job.created.desc())).first()
+    if last and at - last.created < BACKUP_EVERY:
+        return None
+    edited = select(Change.id)
+    if last:
+        edited = edited.where(Change.at > last.created)
+    if db.scalars(edited.limit(1)).first() is None:
+        return None
+    return queue(db, "houses", "backup")
+
+
 def connect(path):
-    """An engine and session factory on the SQLite file at path, tables created if new."""
+    """An engine and session factory on the SQLite file at path, migrated to the latest schema."""
     engine = create_engine(f"sqlite:///{path}", connect_args={"check_same_thread": False})
 
     @event.listens_for(engine, "connect")
@@ -68,5 +117,6 @@ def connect(path):
         conn.execute("PRAGMA journal_mode=WAL")    # pages read while the worker writes
         conn.execute("PRAGMA foreign_keys=ON")
 
-    Base.metadata.create_all(engine)
+    from .migrate import upgrade
+    upgrade(engine)
     return engine, sessionmaker(engine, expire_on_commit=False)

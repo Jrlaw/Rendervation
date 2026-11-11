@@ -4,51 +4,85 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rendervation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap">
 <style>
-:root { --bg: #f3f1ec; --surface: #fbfaf7; --line: #ddd7cd; --ink: #2a2522; --muted: #6f665e; --accent: #8a5233; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #1c1916; --surface: #25211d; --line: #3a342e; --ink: #eee8df; --muted: #a89d91; --accent: #c98a5e; color-scheme: dark; }
+/* Home page: one section per house, a card per room. Drawn by lib/web/home.js from the server. */
+:root {
+  --bg: #f3f1ec; --surface: #fbfaf7; --ink: #2a2522; --muted: #6f665e; --line: #ddd7cd; --accent: #8a5233; --chip: #e8e3da;
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
 }
-:root[data-theme="dark"] { --bg: #1c1916; --surface: #25211d; --line: #3a342e; --ink: #eee8df; --muted: #a89d91; --accent: #c98a5e; color-scheme: dark; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
-main { max-width: 640px; margin: 0 auto; padding: 32px 16px; }
-p { color: var(--muted); }
-a { color: var(--accent); }
-code { font-size: 0.95em; }
-h2 { font-size: 1.1rem; margin: 32px 0 12px; }
-.room { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; max-width: 420px; }
-.room img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--line); }
-.room div { padding: 12px 14px 14px; display: grid; gap: 4px; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #1c1916; --surface: #25211d; --ink: #eee8df; --muted: #a89d91; --line: #3a342e; --accent: #c98a5e; --chip: #2f2a25; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #1c1916; --surface: #25211d; --ink: #eee8df; --muted: #a89d91; --line: #3a342e; --accent: #c98a5e; --chip: #2f2a25; color-scheme: dark; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+main { max-width: 1100px; margin: 0 auto; padding: 32px 16px 64px; }
+header { display: flex; gap: 16px; align-items: start; justify-content: space-between; flex-wrap: wrap; }
+h1 { font: 700 1.6rem var(--font-display); margin: 0 0 4px; }
+h2 { font: 700 1.15rem var(--font-display); margin: 36px 0 12px; display: flex; gap: 10px; align-items: baseline; }
+h2 small { font: 500 0.75rem var(--font-body); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.lede { color: var(--muted); margin: 0; max-width: 60ch; }
+.rooms { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 18px; }
+.room { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+.room img, .room .noimg { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--line); }
+.room.nopic { grid-template-rows: 1fr; align-self: start; }
+/* the " · " before the count only when there's a line before it (or it's being edited) */
+.room small [data-edit]:empty + .sep { display: none; }
+body.editing .room small [data-edit]:empty + .sep { display: inline; }
+.room > div { padding: 12px 14px 14px; display: grid; gap: 4px; align-content: start; }
+.room b { font-weight: 600; }
 .room small { color: var(--muted); }
+.room .chosen { font-size: 0.8rem; color: var(--muted); }
 .room nav { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+.room.missing { opacity: 0.6; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, [contenteditable]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font: 500 0.875rem var(--font-body); color: var(--ink); background: var(--chip); border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.tools { display: none; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.tools button { padding: 4px 10px; font-size: 0.8rem; }
+body.editing .tools { display: flex; }
+body.editing [data-edit] { border-radius: 4px; box-shadow: inset 0 -1px 0 var(--accent); cursor: text; min-width: 4ch; }
+body.editing [data-edit]:empty::before { content: attr(data-placeholder); color: var(--muted); }
+.hidden-list { display: none; margin-top: 12px; gap: 6px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 0.85rem; }
+body.editing .hidden-list { display: flex; }
+.hidden-list button { text-decoration: line-through; opacity: 0.8; }
+.hidden-list button:hover { text-decoration: none; opacity: 1; }
+#status { color: var(--muted); font-size: 0.85rem; min-height: 1.3em; }
+#offline[hidden] { display: none; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Rendervation</h1>
-  <p>Your rooms are listed on <a href="houses/index.html">houses/index.html</a>.</p>
-  <p id="none" hidden>There isn't one yet. Start a room by saying <code>new room: &lt;house&gt;, &lt;room&gt;</code>
-    in Claude Code from this folder (see README.md and PROCESS.md).</p>
-  <h2>Example</h2>
-  <article class="room">
-    <img src="examples/demo-house/rooms/hall-bath/renders/latest/day/photo1.jpg" onerror="this.onerror=null;this.src='examples/demo-house/rooms/hall-bath/web/before/photo1.jpg'" alt="The example hall bath: gray vanity, oval mirror, green subway tile">
+  <header>
     <div>
-      <b>Hall bath</b>
-      <small>Demo house · one public-domain photo, real products</small>
-      <nav>
-        <a href="examples/demo-house/rooms/hall-bath/web/index.html">Walkthrough</a>
-        <a href="examples/demo-house/rooms/hall-bath/web/plans.html">Plans</a>
-        <a href="examples/demo-house/rooms/hall-bath/web/selections.html">Selections</a>
-        <a href="examples/demo-house/web/index.html">House map</a>
-      </nav>
+      <h1>Rendervation</h1>
+      <p class="lede">Rooms modeled so far, by house. Open a walkthrough to look around in 3D and compare renders with the original photos.</p>
     </div>
-  </article>
+    <button id="edit" aria-pressed="false" hidden>Edit</button>
+  </header>
+  <p id="status" role="status"></p>
+  <div id="houses"></div>
+  <!-- opened from disk (or the server's down): how to start it, and the example room -->
+  <div id="offline" hidden>
+    <p>The rooms are listed by the server. Start it with <code>lib/serve.sh</code> in this folder, then open
+      <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a> (README.md).</p>
+    <h2>Example</h2>
+    <div class="rooms">
+      <article class="room">
+        <img src="examples/demo-house/rooms/hall-bath/web/before/photo1.jpg" alt="The example hall bath">
+        <div>
+          <b>Hall bath</b>
+          <small>Demo house · one public-domain photo, real products</small>
+          <nav><a href="examples/demo-house/rooms/hall-bath/web/index.html">Walk through</a></nav>
+        </div>
+      </article>
+    </div>
+  </div>
 </main>
-<script>
-// the home page itself lives in the private houses/ repo (houses/README.md); go there when it exists
-fetch("houses/index.html", { method: "HEAD" })
-  .then(r => r.ok ? location.replace("houses/index.html") : document.getElementById("none").hidden = false)
-  .catch(() => {});
-</script>
+<script src="lib/web/home.js"></script>
 </body>
 </html>

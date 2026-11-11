@@ -15,10 +15,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from ..config import REPO
-from ..db import Change
+from ..db import Change, queue
 from ..deps import current_user, get_db, get_settings
 from ..rooms import read_room
-from .jobs import queue
 
 sys.path.insert(0, os.path.join(REPO, "lib"))
 from roomkit import dimensions  # noqa: E402

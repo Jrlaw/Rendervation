@@ -20,7 +20,7 @@ def test_unknown_room_404s(client):
 def test_choose_makes_a_card_and_lists_it(client, root):
     r = client.put(f"/api/rooms/{DEN}/choice", json={"design": "asis"})
     assert r.status_code == 200
-    assert r.json() == {"ok": True, "chosen": "asis", "card": "test/rooms/den/web/cards/asis.jpg"}
+    assert r.json() == {"ok": True, "chosen": "asis", "card": "/houses/test/rooms/den/web/cards/asis.jpg"}
     assert (root / DEN / "web/cards/asis.jpg").is_file()
     rooms = {x["room"]: x for x in client.get("/api/rooms").json()}
     assert rooms[DEN]["chosen"] == "asis" and rooms[DEN]["card"].endswith("cards/asis.jpg")
