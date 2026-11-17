@@ -51,6 +51,8 @@ body.editing [data-edit]:empty::before { content: attr(data-placeholder); color:
 body.editing .hidden-list { display: flex; }
 .hidden-list button { text-decoration: line-through; opacity: 0.8; }
 .hidden-list button:hover { text-decoration: none; opacity: 1; }
+section.all-hidden { display: none; }
+body.editing section.all-hidden { display: block; }
 #status { color: var(--muted); font-size: 0.85rem; min-height: 1.3em; }
 #offline[hidden] { display: none; }
 </style>
