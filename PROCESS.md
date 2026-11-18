@@ -17,7 +17,8 @@ in order, and a room can stop at any step.
    (the map in `house_layout.py` is optional).
 3. Add the room to `houses/<house>/house.md`. The home page lists it by itself once its
    `web/index.html` exists (the server's database, `server/catalog.py`); give it its name and card
-   line there with **Edit**, or `PATCH /api/rooms/<room>`. If the house has a map (`house_layout.py`), set `folder=` on the room's entry and rebuild it.
+   line there with **Edit**, or `PATCH /api/rooms/<room>`. If the house has a map (`house_layout.py`), set `folder=` on the room's entry and rebuild it. If it
+   shares a wall with a modeled room, add it to `PLACEMENTS` there too (see "Houses": the whole floor).
 4. Fill in the room's README header: house, start date, status, what the project is.
 5. Give the person the shot list and measurement sheet from `intake/README.md` in chat. Keep it
    short, and point out the "no floor plan" option.
@@ -256,10 +257,22 @@ data and its home-page picture are rebuilt by themselves within half a minute of
 already place around them. The home page's cards, links and "N modeled" count come from the server.
 The database backs itself up into `houses/backup/home-render.json` once a day after edits on the web; after a big session run `python3 lib/tools/db_backup.py` and commit `houses/`. When two rooms that touch both exist, it
 also records where each room sits in house coordinates: an origin and a rotation, plus which
-doorway connects them. Until then, each room is modeled in its own coordinates, and anything
-seen through a doorway is a simple stand-in (as the bedroom was before it was built out for
-the bathroom). A whole-house walkthrough loads each room's model at its spot. It gets built
-once a house has two connected rooms worth walking between.
+doorway connects them.
+
+**The whole floor, from every room.** Each room is still its own model, but it's never shown alone once its
+neighbors exist. `house_layout.py` lists where each modeled room sits in `PLACEMENTS` (its origin in house
+inches, rotation, floor, and the design its neighbors show, with the `flags` that build it when they aren't
+`--design <id>`). From that:
+- **The walkthrough** loads the other modeled rooms on the floor around the room, each in its chosen design, so
+  you can look through every doorway and walk on into the next room (`lib/web/walkthrough.js`).
+- **The renders** (`--neighbors on`) append the neighbors, built by their own `room.py` and cached in their
+  `renders/.neighbor/`, so views through doorways show the real rooms and their light (`lib/roomkit/neighbors.py`).
+- **Stand-ins:** until a neighbor is modeled, a room shows a simple stand-in through its doorways. Name every
+  stand-in object `standin_*`, and also a room's copy of a door, jamb or opening the neighbor owns (each shared
+  doorway has one owner; the other room's copy is a stand-in). They're hidden wherever the real neighbor is shown.
+- **Starting a room next to a modeled one:** add it to `PLACEMENTS`, check that the shared wall lines up (the same
+  wall in both `layout.py` files), and rebuild the map. Then re-export the neighbors' walkthroughs if their stand-ins
+  weren't named `standin_*` yet.
 
 ## Conventions
 

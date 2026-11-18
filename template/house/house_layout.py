@@ -48,3 +48,11 @@ ROOMS = [
 # Listing plans, drawn under the map to check the outlines, for example:
 #   "1st": dict(image="intake/plan-1st.png", size_px=(1600, 1000), shift_px=0),
 PLANS = {}
+
+# Where each modeled room's own coordinates sit in the house: origin = the room's plan (0, 0) in house inches,
+# rotation in degrees (counter-clockwise), floor, and the design its neighbors show (the chosen one, else "asis";
+# `flags` = the room.py flags that build it, when they aren't --design <id>). The walkthroughs and the renders
+# show the other modeled rooms on a floor around each room from here (PROCESS.md, "Houses"). For example:
+#   "kitchen": dict(origin=(0, 0), rot=0, floor="1st", design="asis"),
+#   "dining-room": dict(origin=(148.5, 0), rot=0, floor="1st", design="b", flags=["--design", "b"]),
+PLACEMENTS = {}

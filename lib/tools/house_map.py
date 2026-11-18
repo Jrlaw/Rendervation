@@ -76,7 +76,7 @@ for floor, p in L.PLANS.items():
                         w=round(w / L.PX_PER_IN, 1), h=round(h / L.PX_PER_IN, 1))
 
 data = dict(units="inches; x east, y north, z up; origin at one room's interior NW corner (house_layout.py)",
-            floors=L.FLOORS, rooms=rooms, plans=plans,
+            floors=L.FLOORS, rooms=rooms, plans=plans, placements=getattr(L, "PLACEMENTS", {}),
             wall=L.WALL_T, ext_wall=L.EXT_WALL_T)
 os.makedirs(os.path.join(house, "web"), exist_ok=True)
 out = os.path.join(house, "web", "house.js")
