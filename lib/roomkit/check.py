@@ -88,16 +88,54 @@ def family(name):
     return "_".join(t)
 
 
-def groups():
-    """Visible meshes grouped into fixtures: by top-level parent, then by name stem."""
+def _bounds(o):
+    """World-space box of an object (inches)."""
+    pts = [o.matrix_world @ Vector(c) for c in o.bound_box]
+    return [min(p[i] for p in pts) / IN for i in range(3)], [max(p[i] for p in pts) / IN for i in range(3)]
+
+
+def _clusters(objs):
+    """Split one name stem's meshes into pieces whose boxes come within SUPPORT_GAP of each
+    other, so two switches on different walls (switch_stair, switch_kitchen) are two fixtures,
+    not one that hides the floating one. Largest first."""
+    b = [_bounds(o) for o in objs]
+    parent = list(range(len(objs)))
+
+    def top(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+    for i in range(len(objs)):
+        for j in range(i + 1, len(objs)):
+            if all(b[i][0][k] - SUPPORT_GAP <= b[j][1][k] and b[j][0][k] - SUPPORT_GAP <= b[i][1][k] for k in range(3)):
+                parent[top(i)] = top(j)
     out = {}
+    for i, o in enumerate(objs):
+        out.setdefault(top(i), []).append(o)
+    return sorted(out.values(), key=len, reverse=True)
+
+
+def groups():
+    """Visible meshes grouped into fixtures: by top-level parent, then by name stem, then split
+    where a stem's parts don't touch. The largest piece keeps the stem's name; the others are
+    named after their first top-level object."""
+    stems, roots = {}, {}
     for o in core.scene.objects:
         if o.type != "MESH" or o.hide_render:
             continue
         root = o
         while root.parent:
             root = root.parent
-        out.setdefault(family(root.name), []).append(o)
+        stems.setdefault(family(root.name), []).append(o)
+        roots[o] = root.name
+    out = {}
+    for stem, objs in stems.items():
+        for n, part in enumerate(_clusters(objs)):
+            key = stem if n == 0 else min(roots[o] for o in part)
+            while key in out or (n and key in stems):
+                key += "+"
+            out[key] = part
     return out
 
 

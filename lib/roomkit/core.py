@@ -48,6 +48,20 @@ BAKE_SAMPLES = int(arg("--bake-samples", "96"))
 # left live in the walkthrough (view-dependent reflections, transparency); everything else is baked
 BAKE_SKIP = ("glass", "window_glass", "chrome", "nickel", "steel", "mirror", "leaves", "black_glass", "brass",
              "acrylic")   # the tub: a curved shell baked in pieces shows their seams as cracks
+
+
+def bake_skipped(m):
+    """Left live: BAKE_SKIP by name, or any metal or see-through material (a diffuse bake has
+    nothing to show for them, so they come out black)."""
+    if m.name.startswith(BAKE_SKIP):
+        return True
+    b = m.node_tree.nodes.get("Principled BSDF") if m.use_nodes and m.node_tree else None
+    if not b:
+        return False
+    w = b.inputs.get("Transmission Weight")
+    return b.inputs["Metallic"].default_value >= 0.5 or bool(w and w.default_value >= 0.5)
+
+
 NIGHT = "--night" in argv         # evening: room lights dimmed, dark sky, no sun
 # hero: lit like a real-estate photo. Daylight does the work (brighter sky and sun, so the
 # window is the brightest thing in the shot and light falls off across the room), the cans are
@@ -601,8 +615,8 @@ def bake_lighting(out):
     for o in scene.objects:
         if o.type != "MESH" or o.hide_render or not o.data.polygons:
             continue
-        names = [s_.material.name if s_.material else "" for s_ in o.material_slots]
-        if not names or any(n == "" or n.startswith(BAKE_SKIP) for n in names):
+        mats = [s_.material for s_ in o.material_slots]
+        if not mats or any(m is None or bake_skipped(m) for m in mats):
             continue
         if max(o.dimensions) > 25:     # outdoor ground planes: would eat the atlas; left live
             continue
