@@ -1,6 +1,6 @@
 ---
 name: checker
-description: Checks a modeled room for completeness and correctness, before renders are trusted or a walkthrough is baked. Finds what's missing (a tub with no faucet or shower head, a bathroom with no paper holder), what's built wrong (tile running across a window, a fixture inside a wall or blocking a door), and where the model and selections.md disagree. Use when the user asks to check a room ("check the hall bath", "is anything missing?"), and offer it after the as-is model and before the final renders and bake (see PROCESS.md, "Experts"). Tell it the room folder. It reads, runs the geometry check and looks; it doesn't change files.
+description: Checks a modeled room for completeness and correctness, before renders are trusted or a walkthrough is baked. Finds what's missing (a tub with no faucet or shower head, a bathroom with no paper holder), what's built wrong (tile running across a window, a fixture inside a wall or blocking a door), and where the model and selections.md disagree. Use when the user asks to check a room ("check the hall bath", "is anything missing?"), and run it after every as-is model, and before the final renders and bake (see PROCESS.md, "Experts"). Tell it the room folder. It reads, runs the geometry check and looks; it doesn't change files.
 tools: Read, Glob, Grep, Bash
 ---
 
@@ -31,10 +31,27 @@ The room lives in a folder like `houses/<house>/rooms/<room>/` (or `examples/...
    look wrong (a gap at a corner, a light with no fixture, tile with no edge, a fixture
    floating in the picture). Note any render older than `room.py` (`ls -l --time-style=+%F_%T`):
    it may not show the current design.
-5. **The as-is model against the photos**, if the room has `renders/asis/`: read those renders
-   and the photos in `intake/`, and crop in on each fixture in every photo that shows it
-   (`magick photo.jpg -crop WxH+X+Y +repage crop.jpg`). Report anything in the wrong spot, or the
-   wrong size, finish or swing (a faucet mid-rim that's really at the end, brass that's nickel).
+5. **The as-is model against the photos**, if the room has `renders/asis/`. The as-is model has to look
+   like the photos from the same spots: sizes, alignments and finishes. Don't trust the modeler's word
+   for it; check it yourself:
+   - **`intake/asis-check.md`:** every section filled in (cameras solved, overlays, openings, alignments,
+     finishes). A missing or empty section is a finding on its own: the as-is model isn't done.
+   - **Overlays:** run `python3 lib/tools/overlay.py <room>` from the repo root and read every sheet in
+     `renders/asis/overlay/`. Report each red edge that doesn't sit on the photo's edge: a window sill or
+     head, a shelf end, a cabinet, a tile edge, a soffit, a door. Say which way and about how far
+     ("the sill is about 6\" high: the red line sits above the photo's"). A view whose whole picture is
+     shifted means its camera isn't solved.
+   - **Openings:** check each window's and door's sill, head and width against something of known size in
+     the same frame (an 80" door, a 4.5" outlet plate, a 36" counter).
+   - **Alignments:** look for pieces that line up in the photos but not in the model (shelves that run past
+     the tile, a window head below the door heads), and for pairs in `layout.py` that should share a
+     number but don't.
+   - **Finishes:** crop in on every surface and fixture in the frames that show it closest
+     (`magick photo.jpg -crop WxH+X+Y +repage crop.jpg`) and check what the model and `selections.md`
+     call it: marble that's really a streaked porcelain, brass that's nickel, oak that's walnut.
+   - **Fixtures:** crop in on each fixture in every photo that shows it, and report anything in the wrong
+     spot, or the wrong size, finish or swing (a faucet mid-rim that's really at the end).
+   - **Stand-ins:** plain boxes or cylinders standing in for things that show at photo size.
    Also check that the as-is design is in `variants` in `web/index.html`, and open its baked
    model's `scene.json`: a metal or glass material listed in `baked` comes out black.
 

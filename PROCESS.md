@@ -58,14 +58,37 @@ numbered, and record the answers under "Notes from the walkthrough".
    - **A one-off** (this room's soffit, an odd closet): the room's own `room.py`.
    - **Something general** that's missing from `lib/roomkit` (a new kind of part, a fix): change
      `lib/` only for that, and offer it back as a PR to the toolkit repo.
-3. Add a camera for each intake photo (`photo1`, `photo2`, …) and move it until the render
-   lines up with the photo. Put the converted photos in `web/before/photoN.jpg`.
-4. **Check against the photos.** Render each photo view (`--samples 24 --res 1000`) and compare
-   it with the photo side by side. Anything that doesn't line up is a wrong number. Fix it, or
-   ask for one specific measurement ("corner to the window trim, please"). A wide side-by-side
-   hides misplaced fixtures, so also crop in on each fixture (faucet, towel bar, light, mirror) in
-   **every** photo that shows it, and take its position and finish from those crops.
-5. Show the person the side-by-side comparisons. Stop here if that's all they wanted.
+3. Add a camera for each intake photo (`photo1`, `photo2`, …) and put the photo, cropped to the
+   render's 3:4, in `web/before/photoN.jpg`. **Solve every camera** from landmarks with
+   `lib/tools/solve_cameras.py` (a `camera_marks.py` in the room: corners, door and window edges, the
+   ceiling line). A camera placed by eye isn't done: it hides every other error. A mark error above about
+   20 px at 1600 px wide means a dimension is off, so fix the dimension, not the camera.
+4. **Check against the photos. This is required, every room, and nobody should have to ask for it.**
+   The goal: the render looks like the photo from the same spot. Record each part below in the room's
+   `intake/asis-check.md` (from the template) as you do it:
+   - **Overlay.** Render each photo view (`--samples 24 --res 1000` is enough) and run
+     `python3 lib/tools/overlay.py <room>`. It draws the render's edges in red over each photo
+     (`renders/asis/overlay/`). Go edge by edge: every window, door, opening, cabinet, shelf, counter,
+     tile edge, soffit and trim line has to land on the photo's. An edge a few pixels off is a wrong
+     number: fix it and re-run until it lines up. Write each view's score and what you fixed.
+   - **Openings and sizes against known sizes.** Measure every window (sill, head, width), door and
+     opening in the frames against something of known size in the same frame: an 80" door, a 36" counter,
+     a 4.5" outlet plate, 12" tile. Windows run lower and bigger than people guess; don't take a sill from
+     one oblique frame.
+   - **What lines up with what.** List the alignments the photos show (shelves end at the tile's end,
+     window heads level with the door heads, the counter meets the window's stool) and make each one a
+     single number in `layout.py` that both pieces use, so they can't drift apart.
+   - **Finishes from close-ups.** For every surface and fixture (wall tile, floor, counters, cabinets,
+     paint, metal finishes), crop in on it in the frames that show it closest and write what it actually
+     is, with the frame: "shower walls: light gray large-format porcelain with fine linear streaks, not
+     marble (f084, f089)". Name a finish only from a crop, never from a wide view or a guess at the
+     style. The same goes for every fixture's position: crop in on each one in **every** photo that
+     shows it.
+   - **Detail.** Swap stand-in boxes for real shapes for everything that shows at photo size (see the
+     Fidelity standard below). List any left in the README's "Current state".
+5. **Run the `checker` agent** on the as-is model (not just offer it): it re-checks `asis-check.md`, the
+   overlays and the crops independently. Fix what it finds. Then show the person the overlay sheets and
+   the side-by-sides. Stop here if that's all they wanted.
 6. **Save the as-is renders. Every room, every time, before any design work.** They're the "before"
    of the project, and the photos can't stand in for them: photos have clutter, odd angles and
    their own lighting. The as-is scene stays buildable for the life of the room with
@@ -150,8 +173,8 @@ what the person wants. **Offer one** (a one-line question, never run unasked) at
 3. When a selection is still open, or the person describes a style: the designer.
 4. Before stopping a session in which the design changed: one review by the trade most
    affected, unless it was already done for this version.
-5. Before the final renders and the bake (they take minutes): the checker. Also right after the
-   as-is model, together with offer 1.
+5. Before the final renders and the bake (they take minutes): the checker. Right after the as-is
+   model it isn't an offer: run it (step 2, item 5).
 
 **When Claude makes the design calls itself** (an example room, or the person said "your call" or
 "any room"), there's nobody to offer to: run the review at each of those points instead of
@@ -231,7 +254,7 @@ house too:** put it in `house_layout.py` with `folder=` set. With the server run
 data and its home-page picture are rebuilt by themselves within half a minute of any change (a
 `house` job, docs/backend.md); a house without `house_layout.py` gets one, built from what its rooms
 already place around them. The home page's cards, links and "N modeled" count come from the server.
-The database backs itself up into `houses/backup/home-render.json` once a day after edits on the web (committed and pushed, in John's setup); after a big session run `python3 lib/tools/db_backup.py` and commit `houses/`. When two rooms that touch both exist, it
+The database backs itself up into `houses/backup/home-render.json` once a day after edits on the web; after a big session run `python3 lib/tools/db_backup.py` and commit `houses/`. When two rooms that touch both exist, it
 also records where each room sits in house coordinates: an origin and a rotation, plus which
 doorway connects them. Until then, each room is modeled in its own coordinates, and anything
 seen through a doorway is a simple stand-in (as the bedroom was before it was built out for

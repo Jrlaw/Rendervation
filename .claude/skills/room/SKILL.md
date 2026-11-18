@@ -7,7 +7,8 @@ argument-hint: "[new <house> <room> | continue <room> | status]"
 # Room models
 
 Everything lives in this repo. The toolkit (`lib/`, `template/`, the docs) is shared; the
-user's houses live in `houses/`, their own private repo, which this repo ignores.
+user's houses live in `houses/`, their own private repo, which this repo ignores. House data never
+goes in this repo: mind which repo a `git` command runs in.
 **Read `PROCESS.md` first, every time.** It is the playbook: start → intake → model the room as
 it is → ideas and selections → standard renders and walkthrough → save and stop. Then read the
 room's `README.md` ("Current state" says where it stopped) and `selections.md`.
@@ -54,25 +55,35 @@ the selections page and the local server (`lib/serve.sh`, http://127.0.0.1:8000)
   into `renders/asis/day` and `renders/asis/night`, plus the plan and overview sheets, and baked into the walkthrough as an "As it is" pill in the design picker
   (PROCESS.md step 2).
   When a view joins the standard set, render it as-is too. A room without them gets them next.
-- **Check the model against the photos** before designing: render each photo view and compare
-  them side by side.
+- **The as-is model must look like the photos, without the user having to point out errors.** Every room,
+  before any design work, do all of PROCESS.md step 2 items 3-5 and record them in `intake/asis-check.md`:
+  solve every camera (`lib/tools/solve_cameras.py`; never place one by eye and stop); run
+  `lib/tools/overlay.py` and fix every edge that doesn't land on the photo's; measure windows, doors and
+  openings against known sizes in the frame; make pieces that line up share one number in `layout.py`;
+  name every finish only from a close-up crop, citing the frame (never "marble-look" from a wide view);
+  replace stand-in boxes that show at photo size. Then **run** the checker agent (don't just offer it),
+  fix what it finds, and show the overlay sheets. A room isn't "modeled as it is" until that's done.
 - **Keep the person's things out of `lib/`.** Specific products (a particular vanity, a tile
   color measured from a product photo) go in their catalog, `houses/catalog/` (`parts.py`,
   `materials.py`); one-offs stay in the room's `room.py`. Reuse `lib/roomkit` freely, but change
   it only for something general (a new kind of part, a fix), and then as a PR to this repo.
+- **Keep personal details out of this repo** (it can be public): no names, emails, addresses, hostnames or
+  remotes in `lib/`, `template/`, the docs or the agents. Those belong in `houses/` or the user's own config.
 - **Rendering:** through the room's `./render.sh`, which finds Blender and the GPU. Time the
   first render on a machine and give ETAs from it.
 - **Commits:** commit and push only when the user asks, with their own git identity. Room work
   and the catalog go in the `houses/` repo; toolkit changes (`lib/`, `template/`, docs) go in
   this repo, on a branch, as a PR.
 - **Check before trusting a render.** Run `./render.sh --check` (seconds) after any change to
-  `room.py` and fix what it prints before rendering or baking. Offer the `checker` agent after the
-  as-is model and before the final renders and bake.
+  `room.py` and fix what it prints before rendering or baking. Run the `checker` agent after the
+  as-is model (required) and before the final renders and bake.
 - **Experts:** the `trades`, `designer` and `checker` agents (`.claude/agents/`) review the room,
   source products or check the model, in the background. Offer one at the checkpoints in PROCESS.md ("Experts"), in one
   line ("Want a lighting designer to look at this before we stop?"), and run it only on a yes
-  or when asked. Pass the room folder, the trade, and what the person wants. Present what comes
+  or when asked (except the checker after the as-is model, which always runs). The agents load only in a
+  session started inside this repo; started elsewhere, run a general-purpose agent and give it the agent's
+  file (`.claude/agents/<name>.md`) as its instructions, rather than skipping the review. Pass the room folder, the trade, and what the person wants. Present what comes
   back briefly, adopt only what the person agrees to, and credit the review in `selections.md`.
 - **Stopping:** end every stop by updating the room README's "Current state" with a small,
-  concrete next step. If the design changed this session and no trade has reviewed it, offer
+  concrete next step (the user may not come back for a while, so keep it small). If the design changed this session and no trade has reviewed it, offer
   one review first.
