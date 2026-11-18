@@ -39,6 +39,8 @@ RES = int(arg("--res", "1600"))
 SAVE = "--save" in argv
 CHECK = "--check" in argv          # build the room, run roomkit.check and stop (no render)
 EXPORT = arg("--export", "")      # directory: write model.glb + scene.json + bundle.js, skip rendering
+NEIGHBOR_BLEND = arg("--neighbor-blend", "")   # path: save the built room for its neighbors' renders and stop (neighbors.py)
+NEIGHBORS = arg("--neighbors", "off") == "on"   # renders: the other modeled rooms on the floor, in place (neighbors.py)
 # --bake: with --export, bake the Cycles lighting into one texture atlas (out/textures/bake.jpg)
 # so the walkthrough looks like the renders; PX is the atlas size (default 8192)
 BAKE = "--bake" in argv
@@ -419,13 +421,24 @@ def finish(cams, info=None, glass=(), plan_hide=("ceiling", "can_")):
         export_web(EXPORT, info or {})
         sys.exit(0)
 
+    if NEIGHBOR_BLEND:
+        bpy.ops.wm.save_as_mainfile(filepath=NEIGHBOR_BLEND, copy=True)
+        sys.exit(0)
     if SAVE:
         bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ROOM_DIR, "room.blend"))
 
     hidden = [o for o in scene.objects if o.name.startswith(tuple(plan_hide))]
+    around = []                       # the neighbors' objects: left out of the top-down plan
+    if NEIGHBORS:
+        from . import neighbors
+        before = set(scene.objects)
+        neighbors.add(ROOM_DIR)
+        around = [o for o in scene.objects if o not in before and not o.hide_render]
     for name in cams:
         scene.camera = CAMERAS[name]
         for o in hidden:
+            o.hide_render = name == "plan"
+        for o in around:
             o.hide_render = name == "plan"
         scene.render.resolution_x = RES
         if name == "plan":
@@ -646,6 +659,11 @@ def bake_lighting(out):
         # textures projected in object space would lose their origin in the join below: keep each object's coordinates
         attr = m.attributes.new("object_co", "FLOAT_VECTOR", "POINT")
         attr.data.foreach_set("vector", [c for v in m.vertices for c in v.co])
+        # stand-ins (standin_*, or inside one) are split back out after the bake, so the walkthrough can hide them
+        p = o
+        while p and not p.name.startswith("standin_"):
+            p = p.parent
+        m.attributes.new("standin", "INT", "FACE").data.foreach_set("value", [int(p is not None)] * len(m.polygons))
     # one object: Cycles bakes each selected object in its own pass (a full scene sync each),
     # which for hundreds of objects takes far longer than the bake itself
     bpy.ops.object.select_all(action="DESELECT")
@@ -698,6 +716,25 @@ def bake_lighting(out):
     img.save_render(os.path.join(tex_dir, "bake.jpg"), scene=scene)   # through AgX, like the renders
     for m in mats:                    # the exporter keeps procedural materials as flat colors
         m.node_tree.nodes.remove(m.node_tree.nodes["bake_target"])
+    # the stand-ins' faces as their own object, standin_baked (same atlas): hidden where the real neighbor is shown
+    bpy.ops.object.mode_set(mode="EDIT")
+    bm = bmesh.from_edit_mesh(obj.data)
+    lay = bm.faces.layers.int.get("standin")
+    for f in bm.faces:
+        f.select_set(False)
+    n = 0
+    for f in bm.faces:
+        if f[lay]:
+            f.select_set(True)
+            n += 1
+    bmesh.update_edit_mesh(obj.data)
+    if n:
+        bpy.ops.mesh.separate(type="SELECTED")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for o in bpy.context.selected_objects:
+        if o is not obj:
+            o.name = "standin_baked"
+    print("STANDIN FACES", n, flush=True)
     return sorted(m.name for m in mats)
 
 
@@ -740,6 +777,12 @@ def export_web(out, extra):
     """model.glb + scene.json for the walkthrough, and bundle.js (both plus the textures in
     out/textures) so the page also opens straight from disk."""
     os.makedirs(out, exist_ok=True)
+    # web/variants/<id>: its renders tab reads variants/<id>/renders, the design's renders/<id> folder
+    parent, vid = os.path.split(os.path.normpath(os.path.abspath(out)))
+    link = os.path.join(out, "renders")
+    if os.path.basename(parent) == "variants" and os.path.isdir(os.path.join(ROOM_DIR, "renders", vid)) \
+            and not os.path.lexists(link):
+        os.symlink(os.path.relpath(os.path.join(ROOM_DIR, "renders", vid), out), link)
     extra = dict(extra, objects=object_boxes())
     if BAKE:
         extra = dict(extra, bake="bake.jpg", baked=bake_lighting(out))

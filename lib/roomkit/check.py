@@ -173,7 +173,7 @@ def run(ignore=()):
         hi = [hi[0] - 0.25, hi[1] - 0.25, hi[2] - 0.25]
         tunnel = _box(lo, hi)
         for k in box:
-            if k.startswith(IN_OPENING) or any(m.type == "BOOLEAN" and m.object and m.object.name == "cut_" + name
+            if k.removeprefix("standin_").startswith(IN_OPENING) or any(m.type == "BOOLEAN" and m.object and m.object.name == "cut_" + name
                                                for o in G[k] for m in o.modifiers):
                 continue            # the opening's own trim and door, and whatever it's cut through
             blo, bhi = box[k]
