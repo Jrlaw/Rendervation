@@ -63,7 +63,11 @@ numbered, and record the answers under "Notes from the walkthrough".
    render's 3:4, in `web/before/photoN.jpg`. **Solve every camera** from landmarks with
    `lib/tools/solve_cameras.py` (a `camera_marks.py` in the room: corners, door and window edges, the
    ceiling line). A camera placed by eye isn't done: it hides every other error. A mark error above about
-   20 px at 1600 px wide means a dimension is off, so fix the dimension, not the camera.
+   20 px at 1600 px wide means a dimension is off, so fix the dimension, not the camera. Spread the marks out
+   in height as well as across the frame (the floor line, the counter, the ceiling line): marks all at one
+   height fit well but leave the camera's height and tilt loose, and every height read from the photo with
+   them. With a camera solved, read positions straight off the photo with `lib/tools/measure_photo.py`
+   (a pixel cast onto a cabinet front, a wall or the counter), and cast the same edge from a second photo.
 4. **Check against the photos. This is required, every room, and nobody should have to ask for it.**
    The goal: the render looks like the photo from the same spot. Record each part below in the room's
    `intake/asis-check.md` (from the template) as you do it:

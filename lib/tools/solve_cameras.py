@@ -6,12 +6,17 @@ The marks file defines LENS (from EXIF: mm-equivalent x 36 / 34.6 at 4:3) and SH
 name: dict(start=loc, aim=target, portrait=bool, marks=[((x, y, z), (px, py)), ...]), with pixels in the
 1600 px photo. It prints loc, target and roll for camera(...).rotation_euler.rotate_axis("Z", roll).
 A large error means the model's dimensions or the picked pixels are off. Also check that the solved spot
-isn't inside a wall: with marks on one wall only, position along the view is weakly fixed.
+isn't inside a wall: with marks on one wall only, position along the view is weakly fixed. Likewise, marks all at
+about one height (counter corners, cabinet bottoms) leave the camera's height and tilt loose: the fit looks good
+but heights read from the photo can be off by inches. It warns then; add marks near the floor and the ceiling.
+lib/tools/measure_photo.py reads positions off a solved photo.
 """
 import importlib.util
 import sys
 
 import numpy as np
+
+sys.dont_write_bytecode = True        # a marks file edited and re-run within a second must not load a stale .pyc
 
 
 def basis(yaw, pitch, roll):
@@ -66,6 +71,10 @@ def main(path):
         loc = ", ".join(f"{c:.1f}" for c in p[:3])
         aim = ", ".join(f"{c:.1f}" for c in target)
         print(f"{name}: loc=({loc}) target=({aim}) roll={p[5]:.4f}  err px mean {err.mean():.0f} max {err.max():.0f}  per mark {[int(e) for e in err]}")
+        zs = [pt[2] for pt, _ in shot["marks"]]
+        if max(zs) - min(zs) < 30:
+            print(f"  warning: the marks span only {max(zs) - min(zs):.0f}\" in height (z {min(zs):g}-{max(zs):g}), so the "
+                  "camera's height and tilt are loosely fixed; add marks near the floor and the ceiling")
 
 
 if __name__ == "__main__":
