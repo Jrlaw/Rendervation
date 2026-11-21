@@ -28,7 +28,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOOLS = os.path.join(ROOT, "lib", "tools")
 SNAP_PY = os.environ.get("HR_PLAYWRIGHT_PY", os.path.expanduser("~/.cache/home-render/pw-venv/bin/python"))
 URL = "http://127.0.0.1:8000"   # the server, for the snapshot to open (set from the command line)
-SWAP = ("model.glb", "scene.json", "scene.js", "bundle.js", os.path.join("textures", "bake.jpg"))
+SWAP = ("model.glb", "scene.json", "scene.js", "bundle.js",
+        *(os.path.join("textures", f) for f in ("bake.jpg", "albedo.jpg", "roughness.jpg", "normal.jpg")))
 FILES = threading.Lock()     # an export and a bake's swap don't write web/ at the same time
 
 

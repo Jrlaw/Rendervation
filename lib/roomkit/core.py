@@ -42,7 +42,8 @@ EXPORT = arg("--export", "")      # directory: write model.glb + scene.json + bu
 NEIGHBOR_BLEND = arg("--neighbor-blend", "")   # path: save the built room for its neighbors' renders and stop (neighbors.py)
 NEIGHBORS = arg("--neighbors", "off") == "on"   # renders: the other modeled rooms on the floor, in place (neighbors.py)
 # --bake: with --export, bake the Cycles lighting into one texture atlas (out/textures/bake.jpg)
-# so the walkthrough looks like the renders; PX is the atlas size (default 8192)
+# so the walkthrough looks like the renders; PX is the atlas size (default 8192). The surfaces' colors without
+# light, roughness and relief go in the same layout too (albedo, roughness and normal.jpg, for ray tracing)
 BAKE = "--bake" in argv
 BAKE_PX = int(argv[argv.index("--bake") + 1]) if BAKE and argv.index("--bake") + 1 < len(argv) \
     and argv[argv.index("--bake") + 1].isdigit() else 8192
@@ -654,7 +655,9 @@ def bake_lighting(out):
         bm.from_mesh(m)
         if bm.edges and all(e.is_manifold for e in bm.edges):
             outward(bm)
-            bm.to_mesh(m)
+        # n-gons as triangles: the export's tangents (for normal.jpg) can't be worked out on them
+        bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
+        bm.to_mesh(m)
         bm.free()
         # textures projected in object space would lose their origin in the join below: keep each object's coordinates
         attr = m.attributes.new("object_co", "FLOAT_VECTOR", "POINT")
@@ -714,6 +717,30 @@ def bake_lighting(out):
     scene.render.image_settings.file_format = "JPEG"
     scene.render.image_settings.quality = 88
     img.save_render(os.path.join(tex_dir, "bake.jpg"), scene=scene)   # through AgX, like the renders
+    bpy.data.images.remove(img)
+    # the surfaces themselves, no light, in the same atlas, for the walkthrough's ray tracing (the exported
+    # materials are flat colors): their colors, roughness, and relief (grout, grain) as tangent-space normals.
+    # Half size: the path tracer holds textures at 4096 at most anyway. 8-bit, saved as is, no view transform
+    px = BAKE_PX // 2
+    scene.cycles.samples = 4
+
+    def surface(name, kind, data=False, **kw):
+        img = bpy.data.images.new(name, px, px, alpha=True)
+        if data:
+            img.colorspace_settings.name = "Non-Color"
+        for m in mats:
+            m.node_tree.nodes["bake_target"].image = img
+        print("BAKING", name, px, "px", flush=True)
+        bpy.ops.object.bake(type=kind, margin=0, use_clear=True, **kw)
+        fill_gutters(img)
+        img.filepath_raw = os.path.join(tex_dir, name + ".jpg")
+        img.file_format = "JPEG"
+        img.save(quality=90)
+        bpy.data.images.remove(img)
+
+    surface("albedo", "DIFFUSE", pass_filter={"COLOR"})
+    surface("roughness", "ROUGHNESS", data=True)
+    surface("normal", "NORMAL", data=True, normal_space="TANGENT")   # +Y up, as glTF and three expect
     for m in mats:                    # the exporter keeps procedural materials as flat colors
         m.node_tree.nodes.remove(m.node_tree.nodes["bake_target"])
     # the stand-ins' faces as their own object, standin_baked (same atlas): hidden where the real neighbor is shown
@@ -785,13 +812,17 @@ def export_web(out, extra):
         os.symlink(os.path.relpath(os.path.join(ROOM_DIR, "renders", vid), out), link)
     extra = dict(extra, objects=object_boxes())
     if BAKE:
-        extra = dict(extra, bake="bake.jpg", baked=bake_lighting(out))
-    elif os.path.exists(os.path.join(out, "textures", "bake.jpg")):
-        os.remove(os.path.join(out, "textures", "bake.jpg"))   # stale: this export isn't baked
+        extra = dict(extra, bake="bake.jpg", albedo="albedo.jpg", roughness="roughness.jpg", normal="normal.jpg",
+                     baked=bake_lighting(out))
+    else:
+        for f in ("bake.jpg", "albedo.jpg", "roughness.jpg", "normal.jpg"):   # stale: this export isn't baked
+            if os.path.exists(os.path.join(out, "textures", f)):
+                os.remove(os.path.join(out, "textures", f))
     bpy.ops.export_scene.gltf(filepath=os.path.join(out, "model.glb"), export_format="GLB",
                               use_renderable=True, export_apply=True, export_cameras=False,
                               export_lights=False, export_image_format="NONE", export_yup=True,
-                              export_extras=True)   # custom properties, e.g. a mirror's "outline"
+                              export_extras=True,   # custom properties, e.g. a mirror's "outline"
+                              export_tangents=BAKE)   # for normal.jpg: tangents from the bake's UVs, as Cycles had them
     from . import dimensions
     info = dict(units="inches; plan x east, y north, z up", ceiling=CEILING,
                 cameras=CAM_DATA, lights=LIGHTS, dims=DIMS, dimensions=dimensions.entries(),

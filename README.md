@@ -59,7 +59,9 @@ from a phone or laptop on the same home network (`hostname` prints the name). Ct
   walkthrough, renders, plans and selections. New rooms appear by themselves.
 - **Walkthrough:** walk around the room in 3D. Switch day and evening, flip between designs,
   look at the before photos, and fix a measurement (Claude re-exports the room for you). The
-  Settings button adjusts resolution, antialiasing, brightness and field of view for your machine.
+  Settings button adjusts resolution, antialiasing, brightness and field of view for your machine, and turns on
+  ray tracing: light traced live by your graphics card in place of the baked lighting, sharpening while you
+  stand still (a strong graphics card; rooms baked before it show flat colors until re-exported with --bake).
 - **Plans:** a top-down view with every dimension and where it came from.
 - **Selections:** a checklist of the room's products: have, ordered or still to get (click to change; the server
   saves it), with pictures, prices and specs, and a Show in 3D button. The walkthrough's sidebar lists the same
