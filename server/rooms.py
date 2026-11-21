@@ -11,7 +11,7 @@ from .db import DesignSetting, RoomRow
 from .deps import get_db, get_settings
 
 VARIANTS = re.compile(r"variants: (\[.*?\]\]),", re.S)
-PAIR = re.compile(r'\["([\w-]+)", "([^"]*)"\]')
+PAIR = re.compile(r'\["([\w-]+)", "([^"]*)"[,\]]')   # [id, label] or [id, label, { neighbors: ... }]
 CAMERA = re.compile(r'(?:pairs|views): \[\["([\w-]+)"')
 CHOSEN_JS = re.compile(r'window\.CHOSEN = "([\w-]+)"')
 
