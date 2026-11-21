@@ -29,6 +29,14 @@ def test_read_room(root):
     assert read_room(str(root), "houses/test/rooms/nothere") is None
 
 
+def test_read_room_design_with_settings(root, tmp_path):
+    # a design can carry settings for the walkthrough, e.g. which designs the neighboring rooms show
+    page = tmp_path / "houses/test/rooms/den/web/index.html"
+    page.write_text(page.read_text().replace('["open", "Open corner"]]',
+                                             '["open", "Open corner"], ["floor", "Floor", { neighbors: { "hall": "blue" } }]]'))
+    assert read_room(str(root), DEN).own[-2:] == [("open", "Open corner"), ("floor", "Floor")]
+
+
 def test_room_with_one_design(root):
     r = read_room(str(root), "houses/test/rooms/attic")
     assert r.own == [] and r.camera == "photo1"
